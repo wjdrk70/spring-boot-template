@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(":core:core-domain")
+    implementation project(":core:core-enum")
+    implementation project(":clients:exchange-rate")
+    implementation project(":storage:db-core")
+
+    implementation project(":web:security")
+
+    implementation ("org.springframework.boot:spring-boot-starter-web")
+    compileOnly 'org.springframework:spring-tx'
+
+}

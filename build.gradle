@@ -1,0 +1,58 @@
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'org.springframework.boot' apply(false)
+    id 'io.spring.dependency-management'
+    id 'io.spring.javaformat' apply(false)
+    id 'org.asciidoctor.jvm.convert' apply(false)
+}
+
+apply from: 'lint.gradle'
+
+allprojects {
+    group = "${projectGroup}"
+    version = "${applicationVersion}"
+    description = "${projectDescription}"
+    sourceCompatibility = project.javaVersion
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.asciidoctor.jvm.convert'
+
+    bootJar.enabled = false
+    jar.enabled = true
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        compileOnly("org.projectlombok:lombok:1.18.42")
+        annotationProcessor("org.projectlombok:lombok:1.18.42")
+
+        testCompileOnly("org.projectlombok:lombok:1.18.42")
+        testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+}
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

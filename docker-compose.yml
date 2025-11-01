@@ -1,0 +1,32 @@
+services:
+  # MySQL 데이터베이스 서비스
+  mysql:
+    image: mysql:8.0
+    container_name: cargo-db
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    #    command:
+    #      - --character-set-server=utf8mb4
+    #      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      #      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+#      - ./sql-init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "--port=${DB_PORT}","-u", "root", "-p${DB_ROOT_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:

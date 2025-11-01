@@ -1,0 +1,35 @@
+package com.nexsol.cargo.core.api.support.response;
+
+import com.nexsol.cargo.core.api.support.error.CoreApiErrorMessage;
+import com.nexsol.cargo.core.api.support.error.CoreApiErrorType;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class ApiResponse<T> {
+
+	private final ResultType result;
+
+	private final T data;
+
+	private final CoreApiErrorMessage error;
+
+	public static ApiResponse<Object> success() {
+		return new ApiResponse<>(ResultType.SUCCESS, null, null);
+	}
+
+	public static <S> ApiResponse<S> success(S data) {
+		return new ApiResponse<>(ResultType.SUCCESS, data, null);
+	}
+
+	public static <S> ApiResponse<S> error(CoreApiErrorType error, Object errorData) {
+		return new ApiResponse<>(ResultType.ERROR, null, new CoreApiErrorMessage(error, errorData));
+	}
+
+	public static <S> ApiResponse<S> error(CoreApiErrorType error) {
+		return new ApiResponse<>(ResultType.ERROR, null, new CoreApiErrorMessage(error, null));
+	}
+
+}

@@ -1,0 +1,17 @@
+package com.nexsol.cargo.core.api;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.ComponentScan;
+
+@ConfigurationPropertiesScan
+@ComponentScan(basePackages = "com.nexsol.cargo")
+@SpringBootApplication(scanBasePackages = "com.nexsol.cargo")
+public class CoreApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CoreApiApplication.class, args);
+	}
+
+}
