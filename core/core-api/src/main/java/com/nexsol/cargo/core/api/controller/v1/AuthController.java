@@ -16,20 +16,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+	private final AuthService authService;
 
-    @PostMapping("/register")
-    public ApiResponse<SignUpResponse> register(@Valid @RequestBody SignUpRequest request) {
-        User user = request.toDomain();
-        User createUser = authService.signUp(user);
-        return ApiResponse.success(SignUpResponse.fromDomain(createUser));
-    }
+	@PostMapping("/register")
+	public ApiResponse<SignUpResponse> register(@Valid @RequestBody SignUpRequest request) {
+		User user = request.toDomain();
+		User createUser = authService.signUp(user);
+		return ApiResponse.success(SignUpResponse.fromDomain(createUser));
+	}
 
-    @PostMapping("/login")
-    public ApiResponse<SignInResponse> login(@RequestBody SignInRequest request) {
-        String token = authService.signIn(request.getCompanyCode(), request.getPassword());
-        SignInResponse response = new SignInResponse(token);
-        return ApiResponse.success(response);
-    }
+	@PostMapping("/login")
+	public ApiResponse<SignInResponse> login(@RequestBody SignInRequest request) {
+		String token = authService.signIn(request.getCompanyCode(), request.getPassword());
+		SignInResponse response = new SignInResponse(token);
+		return ApiResponse.success(response);
+	}
 
 }
