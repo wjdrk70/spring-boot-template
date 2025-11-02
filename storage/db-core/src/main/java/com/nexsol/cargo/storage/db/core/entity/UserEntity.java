@@ -8,13 +8,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user")
+@Table(name = "app_user")
 @Getter
 @NoArgsConstructor
 public class UserEntity extends BaseEntity {
 
-	@Column(name = "login_id", unique = true, nullable = false)
-	private String loginId;
+	@Column(name = "company_code", unique = true, nullable = false)
+	private String companyCode;
 
 	@Column(nullable = false)
 	private String password;
@@ -30,24 +30,24 @@ public class UserEntity extends BaseEntity {
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserProfileEntity profile;
 
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private CompanyInfoEntity companyInfo;
-
 	public static UserEntity fromDomain(User user) {
 		UserEntity entity = new UserEntity();
-		entity.loginId = user.getLoginId();
+		entity.companyCode = user.getCompanyCode();
 		entity.password = user.getPassword();
 		entity.role = user.getRole();
+		if (user.getProfile() != null) {
+			entity.profile = UserProfileEntity.fromDomain(user.getProfile(), entity);
+		}
+
 		return entity;
 	}
 
 	public User toDomain() {
 		return User.builder()
-			.loginId(this.loginId)
+			.companyCode(this.companyCode)
 			.password(this.password)
 			.role(this.role)
 			.profile(this.profile != null ? this.profile.toDomain() : null)
-			.companyInfo(this.companyInfo != null ? this.companyInfo.toDomain() : null)
 			.build();
 	}
 

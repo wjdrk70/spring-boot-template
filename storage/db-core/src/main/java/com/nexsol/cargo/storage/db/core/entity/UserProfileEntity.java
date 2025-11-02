@@ -4,8 +4,6 @@ import com.nexsol.cargo.core.domain.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "user_profile")
 @Getter
@@ -18,17 +16,44 @@ public class UserProfileEntity extends BaseEntity {
 	private UserEntity user;
 
 	@Column(nullable = false)
-	private String name;
+	private String userName;
+
+	@Column(nullable = false)
+	private String companyName;
+
+	@Column(nullable = false)
+	private String managerName;
+
+	@Column(nullable = false)
+	private String phoneNumber;
+
+	@Column(nullable = false)
+	private String email;
+
+	@Embedded
+	private AddressEmbeddable address;
 
 	public static UserProfileEntity fromDomain(UserProfile profile, UserEntity user) {
 		UserProfileEntity entity = new UserProfileEntity();
 		entity.user = user;
-		entity.name = profile.getName();
+		entity.companyName = profile.getCompanyName();
+		entity.managerName = profile.getManagerName();
+		entity.phoneNumber = profile.getPhoneNumber();
+		entity.email = profile.getEmail();
+		entity.userName = profile.getUserName();
+		entity.address = AddressEmbeddable.fromDomain(profile.getAddress());
 		return entity;
 	}
 
 	public UserProfile toDomain() {
-		return UserProfile.builder().name(this.name).build();
+		return UserProfile.builder()
+			.userName(this.userName)
+			.companyName(this.companyName)
+			.managerName(this.managerName)
+			.phoneNumber(this.phoneNumber)
+			.email(this.email)
+			.address(this.address.toDomain())
+			.build();
 	}
 
 }

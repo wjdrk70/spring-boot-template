@@ -1,7 +1,6 @@
 package com.nexsol.cargo.core.api.controller.v1.request;
 
 import com.nexsol.cargo.core.domain.Address;
-import com.nexsol.cargo.core.domain.CompanyInfo;
 import com.nexsol.cargo.core.domain.User;
 import com.nexsol.cargo.core.domain.UserProfile;
 import com.nexsol.cargo.core.enums.UserRole;
@@ -15,19 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SignUpRequest {
 
-	@NotBlank(message = "로그인 ID(사업자번호)는 필수입니다")
-	private String loginId;
-
 	@NotBlank(message = "비밀번호는 필수입니다")
 	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
 			message = "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다")
 	private String password;
 
 	// UserProfile
-	@NotBlank(message = "이름은 필수입니다")
-	private String name;
+	@NotBlank(message = "사업자명은 필수입니다")
+	private String userName;
 
-	// CompanyInfo
 	@NotBlank(message = "상호명은 필수입니다")
 	private String companyName;
 
@@ -56,13 +51,12 @@ public class SignUpRequest {
 
 	public User toDomain() {
 		return User.builder()
-			.loginId(this.loginId)
+			.companyCode(this.companyCode)
 			.password(this.password)
 			.role(UserRole.ADMIN) // 현재는 ADMIN만 사용
-			.profile(UserProfile.builder().name(this.name).build())
-			.companyInfo(CompanyInfo.builder()
+			.profile(UserProfile.builder()
+				.userName(this.userName)
 				.companyName(this.companyName)
-				.companyCode(this.companyCode)
 				.managerName(this.managerName)
 				.phoneNumber(this.phoneNumber)
 				.email(this.email)

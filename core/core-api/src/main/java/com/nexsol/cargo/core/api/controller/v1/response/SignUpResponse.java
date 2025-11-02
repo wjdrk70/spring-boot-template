@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Builder
 @AllArgsConstructor
@@ -15,7 +13,7 @@ public class SignUpResponse {
 
 	private Long userId;
 
-	private String loginId;
+	private String companyCode;
 
 	private String name;
 
@@ -28,9 +26,9 @@ public class SignUpResponse {
 	public static SignUpResponse fromDomain(User user) {
 		return SignUpResponse.builder()
 			.userId(user.getId())
-			.loginId(user.getLoginId())
-			.companyName(user.getCompanyInfo().getCompanyName())
-			.email(user.getCompanyInfo().getEmail())
+			.companyCode(user.getCompanyCode())
+			.companyName(user.getProfile().getCompanyName())
+			.email(user.getProfile().getEmail())
 			.name(user.getName())
 			.role(user.getRole())
 			.build();

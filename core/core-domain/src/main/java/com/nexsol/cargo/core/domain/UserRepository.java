@@ -6,7 +6,7 @@ public interface UserRepository {
 
 	User save(User user);
 
-	Optional<User> findByLonginId(String loginId);
+	Optional<User> findByCompanyCode(String companyCode);
 
 	Optional<User> findById(Long id);
 

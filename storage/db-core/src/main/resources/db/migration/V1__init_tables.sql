@@ -1,43 +1,35 @@
--- --- user ---
-CREATE TABLE user
+-- --- member ---
+CREATE TABLE app_user
 (
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-    login_id   VARCHAR(50)  NOT NULL UNIQUE COMMENT '사업자 번호=로그인시 ID',
-    password   VARCHAR(255) NOT NULL,
-    role       ENUM('ADMIN') NOT NULL COMMENT '현재 admin(사업자)만 사용',
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL DEFAULT NULL
-);
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    company_code VARCHAR(50)  NOT NULL UNIQUE COMMENT '사업자번호 (로그인 ID)',
+    password     VARCHAR(255) NOT NULL,
+    role         ENUM('ADMIN') NOT NULL,
+    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at   DATETIME NULL DEFAULT NULL
+) COMMENT '사업자 회원';
 
 
 CREATE TABLE user_profile
 (
-    user_id    BIGINT PRIMARY KEY,
-    name       VARCHAR(255) NOT NULL,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
-);
-
-
-CREATE TABLE company_info
-(
-    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id        BIGINT       NOT NULL,
+    user_id        BIGINT PRIMARY KEY COMMENT 'app_user.id 참조',
     company_name   VARCHAR(255) NOT NULL COMMENT '상호명',
-    company_code   VARCHAR(50)  NOT NULL,
+    user_name           VARCHAR(255) NOT NULL COMMENT '담당자 이름',
     manager_name   VARCHAR(255) NOT NULL COMMENT '담당자 명',
     phone_number   VARCHAR(20)  NOT NULL COMMENT '휴대폰번호',
     email          VARCHAR(255) NOT NULL COMMENT '이메일',
+
     zip_code       VARCHAR(10)  NOT NULL COMMENT '우편번호',
-    address_line  VARCHAR(255) NOT NULL COMMENT '기본 주소 (e.g., 도로명/지번)',
-    address_detail VARCHAR(255) NULL COMMENT '상세 주소 (e.g., 201호)',
+    address_line   VARCHAR(255) NOT NULL COMMENT '기본 주소',
+    address_detail VARCHAR(255) NULL COMMENT '상세 주소',
+
     created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at     DATETIME NULL DEFAULT NULL,
-    CONSTRAINT fk_company_user FOREIGN KEY (user_id) REFERENCES user (id)
-) COMMENT '회원가입시 회사정보';
+    updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_user_profile_to_app_user
+        FOREIGN KEY (user_id) REFERENCES `app_user` (id) ON DELETE CASCADE
+);
 
 -- --- 테이블 1: 기본 조건(담보특약) ---
 CREATE TABLE coverage_rider
@@ -95,7 +87,7 @@ CREATE TABLE subscription
     created_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_subscription_user FOREIGN KEY (user_id) REFERENCES user (id)
+    CONSTRAINT fk_subscription_user FOREIGN KEY (user_id) REFERENCES `app_user` (id)
 ) COMMENT '청약서';
 
 -- --- 청약 snapshot 테이블 ---
@@ -129,7 +121,7 @@ CREATE TABLE user_refresh_token
     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_refresh_token_user
-        FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES `app_user` (id) ON DELETE CASCADE,
 
     INDEX idx_user_id (user_id)
 ) COMMENT '사용자 리프레시 토큰 (멀티 디바이스 지원)';

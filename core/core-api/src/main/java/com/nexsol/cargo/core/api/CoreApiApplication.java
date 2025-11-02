@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ComponentScan;
 
-@ConfigurationPropertiesScan
+@ConfigurationPropertiesScan(basePackages = "com.nexsol.cargo")
 @ComponentScan(basePackages = "com.nexsol.cargo")
 @SpringBootApplication(scanBasePackages = "com.nexsol.cargo")
 public class CoreApiApplication {

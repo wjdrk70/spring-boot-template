@@ -9,6 +9,18 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserProfile {
 
-	private String name;
+	private String userName;
+
+	private String companyName;
+
+	private String companyCode;
+
+	private String managerName;
+
+	private String phoneNumber;
+
+	private String email;
+
+	private Address address;
 
 }

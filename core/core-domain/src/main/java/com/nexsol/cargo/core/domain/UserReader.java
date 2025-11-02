@@ -11,12 +11,13 @@ public class UserReader {
 
 	private final UserRepository userRepository;
 
-	public User read(String id) {
-		return userRepository.findByLonginId(id).orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+	public User read(String companyCode) {
+		return userRepository.findByCompanyCode(companyCode)
+			.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
 	}
 
-	public void findUser(String id) {
-		userRepository.findByLonginId(id).ifPresent(user -> {
+	public void findUser(String companyCode) {
+		userRepository.findByCompanyCode(companyCode).ifPresent(user -> {
 			throw new CoreException(CoreErrorType.USER_EXIST_DATA);
 		});
 	}

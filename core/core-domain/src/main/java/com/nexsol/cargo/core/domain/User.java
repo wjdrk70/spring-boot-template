@@ -12,7 +12,7 @@ public class User {
 
 	private Long id;
 
-	private String loginId;
+	private String companyCode;
 
 	private String password;
 
@@ -20,12 +20,10 @@ public class User {
 
 	private UserProfile profile;
 
-	private CompanyInfo companyInfo;
-
 	private UserRole role;
 
-	public String getName() {
-		return profile != null ? profile.getName() : null;
+	public String getUserName() {
+		return profile != null ? profile.getUserName() : null;
 	}
 
 }

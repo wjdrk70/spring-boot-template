@@ -18,7 +18,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 
 	public User signUp(User user) {
-		userReader.findUser(user.getLoginId());
+		userReader.findUser(user.getCompanyCode());
 
 		String hashedPassword = passwordEncoder.encode(user.getPassword());
 
@@ -27,8 +27,9 @@ public class AuthService {
 		return newUser;
 	}
 
-	public String signIn(String id, String password) {
-		User existUser = userReader.read(id);
+	public String signIn(String companyCode, String password) {
+
+		User existUser = userReader.read(companyCode);
 
 		boolean equalPassword = passwordEncoder.matches(password, existUser.getPassword());
 

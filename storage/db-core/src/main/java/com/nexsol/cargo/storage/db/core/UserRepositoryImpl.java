@@ -22,8 +22,8 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findByLonginId(String loginId) {
-		return userJpaRepository.findByLoginId(loginId).map(UserEntity::toDomain);
+	public Optional<User> findByCompanyCode(String companyCode) {
+		return userJpaRepository.findByCompanyCode(companyCode).map(UserEntity::toDomain);
 	}
 
 	@Override
