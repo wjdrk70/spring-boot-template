@@ -2,6 +2,7 @@ package com.nexsol.cargo.core.api.controller.v1;
 
 import com.nexsol.cargo.core.api.controller.v1.request.SignInRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.SignUpRequest;
+import com.nexsol.cargo.core.api.controller.v1.response.SignInResponse;
 import com.nexsol.cargo.core.domain.AuthService;
 import com.nexsol.cargo.core.domain.User;
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
@@ -15,19 +16,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-	private final AuthService authService;
+    private final AuthService authService;
 
-	@PostMapping("/register")
-	public ApiResponse<SignUpResponse> register(@Valid @RequestBody SignUpRequest request) {
-		User user = request.toDomain();
-		User createUser = authService.signUp(user);
-		return ApiResponse.success(SignUpResponse.fromDomain(createUser));
-	}
+    @PostMapping("/register")
+    public ApiResponse<SignUpResponse> register(@Valid @RequestBody SignUpRequest request) {
+        User user = request.toDomain();
+        User createUser = authService.signUp(user);
+        return ApiResponse.success(SignUpResponse.fromDomain(createUser));
+    }
 
-	@PostMapping("/login")
-	public ApiResponse<String> login(@RequestBody SignInRequest request) {
-		String token = authService.signIn(request.getCompanyCode(), request.getPassword());
-		return ApiResponse.success(token);
-	}
+    @PostMapping("/login")
+    public ApiResponse<SignInResponse> login(@RequestBody SignInRequest request) {
+        String token = authService.signIn(request.getCompanyCode(), request.getPassword());
+        SignInResponse response = new SignInResponse(token);
+        return ApiResponse.success(response);
+    }
 
 }

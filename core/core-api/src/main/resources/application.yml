@@ -12,9 +12,9 @@ spring:
     import:
       - optional:file:.env[.properties]
       - db-core.yml
-  jwt:
-    secret: ${JWT_SECRET}  # .env의 JWT_SECRET 값을 jwt.secret 프로퍼티로 매핑
-    expiration: ${JWT_EXPIRATION}
+jwt:
+  secret: ${JWT_SECRET}  # .env의 JWT_SECRET 값을 jwt.secret 프로퍼티로 매핑
+  expiration: ${JWT_EXPIRATION}
 
 server:
   port: 8080
