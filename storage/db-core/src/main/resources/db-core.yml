@@ -16,6 +16,7 @@ spring:
 #        show_sql: true
 
   flyway:
+    clean-on-validation-error: true
     enabled: true
     baseline-on-migrate: true
     validate-on-migrate: false  # 임시로 validation 비활성화
@@ -41,7 +42,28 @@ spring.config.activate.on-profile: local-dev
 storage:
   datasource:
     core:
-      jdbc-url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+      jdbc-url: jdbc:mysql://localhost:${DB_PORT}/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 20
+        minimum-idle: 5
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000
+---
+# 3. 프론트 개발자용 (Docker App -> Docker DB) (추가)
+spring.config.activate.on-profile: docker-dev
+spring:
+  docker:
+    compose:
+      enabled: false
+storage:
+  datasource:
+    core:
+      # ⬇️ ${DB_HOST} (즉, 'mysql')을 사용
+      jdbc-url: jdbc:mysql://${DB_HOST}:3306/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
       driver-class-name: com.mysql.cj.jdbc.Driver

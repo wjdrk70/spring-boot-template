@@ -101,6 +101,7 @@ CREATE TABLE subscription
     insured_company_name      VARCHAR(255) NULL COMMENT '피보험자 상호명',
     insured_company_code      VARCHAR(50) NULL COMMENT '피보험자 사업자번호',
     ocr_data_snapshot         JSON NULL COMMENT '청약 시점의 OCR 원본 데이터 스냅샷',
+    hs_code                   VARCHAR(50) NULL COMMENT '청약 시점의 HS Code (플랜 추천 분석용)',
     created_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
