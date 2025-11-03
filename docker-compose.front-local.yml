@@ -1,0 +1,57 @@
+services:
+  app:
+    # 1. 빌드하는 대신 JDK 이미지를 직접 사용
+    image: eclipse-temurin:17-jdk
+    container_name: cargo-spring-application-dev
+    working_dir: /app
+
+    # 2. NestJS와 동일하게 로컬 소스 코드를 마운트
+    volumes:
+      - .:/app
+      # (선택) Gradle 캐시를 호스트와 공유하여 의존성 다운로드 속도 향상
+      - ~/.gradle:/root/.gradle
+
+    # 3. 'npm run start:dev' 대신 Gradle의 'bootRun' 사용 (Spring Boot Devtools 필요)
+    command: ["./gradlew", ":core:core-api:bootRun"]
+
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # .env 파일에서 가져오지만, 명시적으로 다시 정의 (기존 NestJS 방식과 동일)
+      DATABASE_HOST: ${DB_HOST}
+      DATABASE_PORT: ${DB_PORT}
+      DATABASE_USER: ${DB_USERNAME}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      DATABASE_NAME: ${DB_DATABASE}
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: cargo-db
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "--port=${DB_PORT}","-u", "root", "-p${DB_ROOT_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:
