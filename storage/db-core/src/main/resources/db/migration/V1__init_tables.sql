@@ -31,45 +31,62 @@ CREATE TABLE user_profile
         FOREIGN KEY (user_id) REFERENCES `app_user` (id) ON DELETE CASCADE
 );
 
--- --- 테이블 1: 기본 조건(담보특약) ---
+-- --- 기본 담보 (Master) ---
 CREATE TABLE coverage_rider
 (
     id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50)  NOT NULL UNIQUE,
-    name VARCHAR(255) NOT NULL
+    code VARCHAR(50)  NOT NULL UNIQUE COMMENT '담보특약 코드 (e.g., 101662)',
+    name VARCHAR(255) NOT NULL COMMENT '담보특약 명칭 (e.g., ICC(A))'
+);
+
+-- --- 옵션 담보 (Master) ---
+CREATE TABLE coverage_option
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    code        VARCHAR(50)  NOT NULL UNIQUE COMMENT '하위 조건 코드 (e.g., 102077)',
+    name        VARCHAR(255) NOT NULL COMMENT '하위 조건 명칭 (e.g., WAR CLAUSES)',
+    option_type ENUM('REFERENCE', 'ADDITIONAL', 'EXTENSION') NOT NULL COMMENT '옵션 타입'
 );
 
 -- --- 적하품목 meta data ---
 CREATE TABLE cargo_item
 (
     id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code     varchar(50) NOT NULL UNIQUE,
+    name     varchar(50) NOT NULL UNIQUE,
     hs_code  varchar(50) NOT NULL UNIQUE,
     rider_id BIGINT      NOT NULL,
+    INDEX            idx_hs_code (hs_code),
     CONSTRAINT fk_cargo_rider FOREIGN KEY (rider_id) REFERENCES coverage_rider (id)
 ) COMMENT '적하품목';
 
 
--- --- 테이블 2: 하위 조건(담보 특약의 하위) ---
-CREATE TABLE coverage_option
+-- --- 옵션 매핑 (M:N) ---
+-- (cargo_item 1건에 엮인 N개의 옵션들을 저장)
+CREATE TABLE cargo_item_option
 (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code        VARCHAR(50)  NOT NULL UNIQUE,
-    name        VARCHAR(255) NOT NULL,
-    option_type ENUM('REFERENCE', 'ADDITIONAL', 'EXTENSION') NOT NULL COMMENT '담보특약코드 의 참조,추가,확장 코드 타입'
-) COMMENT '담보특약(기본코드)';
+    cargo_item_id      BIGINT NOT NULL COMMENT 'AI 계약 ID (cargo_item.id)',
+    coverage_option_id BIGINT NOT NULL COMMENT '담보 옵션 ID (coverage_option.id)',
 
--- --- 테이블 3: N:M 매핑 테이블 (핵심) ---
-CREATE TABLE coverage_rider_option
-(
-    id        BIGINT AUTO_INCREMENT PRIMARY KEY,
-    rider_id  BIGINT NOT NULL,
-    option_id BIGINT NOT NULL,
-    UNIQUE KEY uk_rider_option (rider_id, option_id),
-    CONSTRAINT fk_map_rider FOREIGN KEY (rider_id) REFERENCES coverage_rider (id) ON DELETE CASCADE,
-    CONSTRAINT fk_map_option FOREIGN KEY (option_id) REFERENCES coverage_option (id) ON DELETE CASCADE
+    PRIMARY KEY (cargo_item_id, coverage_option_id),
+    CONSTRAINT fk_item_option_item FOREIGN KEY (cargo_item_id) REFERENCES cargo_item (id) ON DELETE CASCADE,
+    CONSTRAINT fk_item_option_option FOREIGN KEY (coverage_option_id) REFERENCES coverage_option (id)
 );
 
+
+-- --- 보험 요율표 ---
+CREATE TABLE premium_rate
+(
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coverage_code VARCHAR(50)    NOT NULL UNIQUE COMMENT '담보 코드 (rider.code 또는 option.code)',
+    rate          DECIMAL(10, 5) NOT NULL COMMENT '보험 요율 (e.g., 0.0015)',
+
+    -- (향후 확장을 위해 주석 처리)
+    -- min_amount   DECIMAL(19, 4) NOT NULL DEFAULT 0.0 COMMENT '송장가액 최소',
+    -- max_amount   DECIMAL(19, 4) NOT NULL DEFAULT 999999999.0 COMMENT '송장가액 최대',
+    -- ... (구간, 선박 등에 따른 조건 컬럼 추가 가능)
+
+    INDEX idx_coverage_code (coverage_code)
+);
 
 -- --- 청약 테이블 ---
 CREATE TABLE subscription
