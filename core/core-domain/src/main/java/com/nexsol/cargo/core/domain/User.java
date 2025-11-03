@@ -16,8 +16,6 @@ public class User {
 
 	private String password;
 
-	private String name;
-
 	private UserProfile profile;
 
 	private UserRole role;

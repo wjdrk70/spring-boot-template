@@ -9,36 +9,38 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-	private final UserReader userReader;
+    private final UserReader userReader;
 
-	private final UserAppender userAppender;
+    private final UserAppender userAppender;
 
-	private final JwtService jwtService;
+    private final JwtService jwtService;
 
-	private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	public User signUp(User user) {
-		userReader.findUser(user.getCompanyCode());
+    public User signUp(User user) {
+        userReader.findUser(user.getCompanyCode());
 
-		String hashedPassword = passwordEncoder.encode(user.getPassword());
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
 
-		User newUser = userAppender.append(user, hashedPassword);
+        User newUser = userAppender.append(user, hashedPassword);
 
-		return newUser;
-	}
+        return newUser;
+    }
 
-	public String signIn(String companyCode, String password) {
+    public UserInfo signIn(String companyCode, String password) {
 
-		User existUser = userReader.read(companyCode);
+        User existUser = userReader.read(companyCode);
 
-		boolean equalPassword = passwordEncoder.matches(password, existUser.getPassword());
+        boolean equalPassword = passwordEncoder.matches(password, existUser.getPassword());
 
-		if (!equalPassword) {
-			throw new CoreException(CoreErrorType.AUTH_UNAUTHORIZED);
-		}
+        if (!equalPassword) {
+            throw new CoreException(CoreErrorType.AUTH_UNAUTHORIZED);
+        }
 
-		JwtPayload payload = new JwtPayload(existUser.getId());
-		return jwtService.sign(payload);
-	}
+        JwtPayload payload = new JwtPayload(existUser.getId());
+        String token = jwtService.sign(payload);
+
+        return new UserInfo(token, existUser);
+    }
 
 }

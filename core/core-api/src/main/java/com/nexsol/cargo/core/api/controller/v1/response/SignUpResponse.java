@@ -15,7 +15,7 @@ public class SignUpResponse {
 
 	private String companyCode;
 
-	private String name;
+	private String userName;
 
 	private String companyName;
 
@@ -29,7 +29,7 @@ public class SignUpResponse {
 			.companyCode(user.getCompanyCode())
 			.companyName(user.getProfile().getCompanyName())
 			.email(user.getProfile().getEmail())
-			.name(user.getName())
+			.userName(user.getProfile().getUserName())
 			.role(user.getRole())
 			.build();
 	}
