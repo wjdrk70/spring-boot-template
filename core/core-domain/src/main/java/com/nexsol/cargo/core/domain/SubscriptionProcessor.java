@@ -4,7 +4,6 @@ import com.nexsol.cargo.core.enums.SubscriptionStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -15,30 +14,25 @@ public class SubscriptionProcessor {
 
 	private final SubscriptionSnapshotCreator snapshotCreator;
 
-	public Subscription createSubscription(CreateSubscription creation, BigDecimal premium) {
+	public Subscription createSubscription(CreateSubscription creation) {
 		List<CoverageSnapshot> snapshots = snapshotCreator.create(creation.coverageCodes());
 
 		if (snapshots == null) {
-			snapshots = List.of(); // ⬅️
+			snapshots = List.of();
 		}
 
 		Subscription subscription = Subscription.builder()
-			.hsCode(creation.hsCode())
-			.invoiceAmount(creation.invoiceAmount())
-			.currencyUnit(creation.currencyUnit())
-			.id(null)
-			.insurancePremium(premium)
-			.insuredCompanyCode(creation.insuredCompanyCode())
-			.userId(creation.userId())
-			.insuredCompanyName(creation.insuredCompanyName())
-			.policyholderCompanyName(creation.policyholderCompanyName())
-			.isSame(creation.isSame())
-			.insuredCompanyCode(creation.insuredCompanyCode())
-			.policyholderCompanyCode(creation.policyholderCompanyCode())
-			.status(SubscriptionStatus.PAYMENT_PENDING)
-			.cargoDetail(creation.cargoDetail())
-			.snapshots(snapshots)
-			.build();
+                .id(null)
+                .userId(creation.userId())
+                .status(SubscriptionStatus.PAYMENT_PENDING)
+                .isSame(creation.isSame())
+                .policyholderCompanyName(creation.policyholderCompanyName())
+                .policyholderCompanyCode(creation.policyholderCompanyCode())
+                .insuredCompanyName(creation.insuredCompanyName())
+                .insuredCompanyCode(creation.insuredCompanyCode())
+                .cargoDetail(creation.cargoDetail())
+                .snapshots(snapshots)
+                .build();
 
 		return subscriptionRepository.save(subscription);
 	}

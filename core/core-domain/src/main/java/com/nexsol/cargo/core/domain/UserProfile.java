@@ -1,19 +1,17 @@
 package com.nexsol.cargo.core.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class UserProfile {
+
+	private Long userId;
 
 	private String userName;
 
 	private String companyName;
-
-	private String companyCode;
 
 	private String managerName;
 

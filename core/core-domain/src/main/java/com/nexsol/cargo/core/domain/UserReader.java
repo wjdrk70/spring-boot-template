@@ -11,8 +11,15 @@ public class UserReader {
 
 	private final UserRepository userRepository;
 
+	private final UserProfileRepository userProfileRepository;
+
 	public User read(String companyCode) {
 		return userRepository.findByCompanyCode(companyCode)
+			.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
+	}
+
+	public UserProfile readProfile(Long userId) {
+		return userProfileRepository.findByUserId(userId)
 			.orElseThrow(() -> new CoreException(CoreErrorType.USER_NOT_FOUND));
 	}
 

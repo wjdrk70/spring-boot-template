@@ -20,7 +20,7 @@ public class SubscriptionService {
 
 		Subscription savedSubscription = processor.createSubscription(creation, premium);
 
-		return new SubscriptionResult(savedSubscription.id(), savedSubscription.insurancePremium());
+        return new SubscriptionResult(savedSubscription.id(), premium);
 	}
 
 }

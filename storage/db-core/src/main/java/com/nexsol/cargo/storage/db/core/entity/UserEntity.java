@@ -27,18 +27,11 @@ public class UserEntity extends BaseEntity {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-	// UserEntity는 UserProfile의 주인이 아님!!!!!!!!!!
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private UserProfileEntity profile;
-
 	public static UserEntity fromDomain(User user) {
 		UserEntity entity = new UserEntity();
 		entity.companyCode = user.getCompanyCode();
 		entity.password = user.getPassword();
 		entity.role = user.getRole();
-		if (user.getProfile() != null) {
-			entity.profile = UserProfileEntity.fromDomain(user.getProfile(), entity);
-		}
 
 		return entity;
 	}
@@ -49,7 +42,6 @@ public class UserEntity extends BaseEntity {
 			.companyCode(this.companyCode)
 			.password(this.password)
 			.role(this.role)
-			.profile(this.profile != null ? this.profile.toDomain() : null)
 			.build();
 	}
 

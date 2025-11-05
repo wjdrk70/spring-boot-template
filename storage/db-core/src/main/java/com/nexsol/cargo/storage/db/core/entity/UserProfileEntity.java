@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "user_profile")
 @Getter
 @NoArgsConstructor
-public class UserProfileEntity extends BaseEntity {
+public class UserProfileEntity {
 
-	@OneToOne
-	@MapsId
-	@JoinColumn(name = "user_id")
-	private UserEntity user;
+	@Id
+	@Column(name = "user_id")
+	private Long userId;
 
 	@Column(nullable = false)
 	private String userName;
@@ -34,9 +33,9 @@ public class UserProfileEntity extends BaseEntity {
 	@Embedded
 	private AddressEmbeddable address;
 
-	public static UserProfileEntity fromDomain(UserProfile profile, UserEntity user) {
+	public static UserProfileEntity fromDomain(UserProfile profile) {
 		UserProfileEntity entity = new UserProfileEntity();
-		entity.user = user;
+		entity.userId = profile.getUserId();
 		entity.companyName = profile.getCompanyName();
 		entity.managerName = profile.getManagerName();
 		entity.phoneNumber = profile.getPhoneNumber();
@@ -48,6 +47,7 @@ public class UserProfileEntity extends BaseEntity {
 
 	public UserProfile toDomain() {
 		return UserProfile.builder()
+			.userId(this.userId)
 			.userName(this.userName)
 			.companyName(this.companyName)
 			.managerName(this.managerName)

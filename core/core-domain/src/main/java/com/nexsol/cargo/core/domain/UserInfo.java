@@ -1,4 +1,4 @@
 package com.nexsol.cargo.core.domain;
 
-public record UserInfo(String accessToken, User user) {
+public record UserInfo(String accessToken, User user, UserProfile profile) {
 }

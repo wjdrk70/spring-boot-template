@@ -3,7 +3,8 @@ package com.nexsol.cargo.core.api.controller.v1;
 import com.nexsol.cargo.core.api.controller.v1.request.CreateSubscriptionRequest;
 import com.nexsol.cargo.core.api.controller.v1.response.CreateSubscriptionResponse;
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
-import com.nexsol.cargo.core.domain.PaymentDetail;
+import com.nexsol.cargo.core.domain.CreateSubscription;
+import com.nexsol.cargo.core.domain.SubscriptionResult;
 import com.nexsol.cargo.core.domain.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
 
-	private final PaymentService paymentService;
 
 	@PostMapping
 	public ApiResponse<CreateSubscriptionResponse> create(@AuthenticationPrincipal Long userId,
@@ -29,9 +29,8 @@ public class SubscriptionController {
 
 		SubscriptionResult result = subscriptionService.create(dto);
 
-		PaymentDetail paymentDetail = paymentService.readyPayment(result.subscriptionId(), dto.invoiceAmount());
 
-		return ApiResponse.success(CreateSubscriptionResponse.of(result, paymentDetail));
+		return ApiResponse.success(CreateSubscriptionResponse.of(result));
 
 	}
 

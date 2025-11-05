@@ -2,12 +2,13 @@ package com.nexsol.cargo.storage.db.core;
 
 import com.nexsol.cargo.core.domain.PastContractCoverage;
 import com.nexsol.cargo.core.domain.PastContractRepository;
-import com.nexsol.cargo.storage.db.core.entity.SubscriptionEntity;
-import com.nexsol.cargo.storage.db.core.entity.SubscriptionSnapshotEntity;
+import com.nexsol.cargo.storage.db.core.entity.SubscriptionCargoEntity;
+import com.nexsol.cargo.storage.db.core.entity.SubscriptionCoverageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,22 +16,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PastContractRepositoryImpl implements PastContractRepository {
 
-	private final SubscriptionJpaRepository subscriptionJpaRepository;
+    private final SubscriptionCargoJpaRepository subscriptionCargoJpaRepository;
+    private final SubscriptionCoverageJpaRepository subscriptionCoverageJpaRepository;
 
-	@Override
-	public List<PastContractCoverage> findByHsCode(String hsCode) {
-		List<SubscriptionEntity> subscriptions = subscriptionJpaRepository.findByHsCodeWithSnapshots(hsCode);
+    @Override
+    public List<PastContractCoverage> findByHsCode(String hsCode) {
+        List<Long> subscriptionIds = subscriptionCargoJpaRepository.findByHsCode(hsCode)
+                .stream()
+                .map(SubscriptionCargoEntity::getSubscriptionId)
+                .distinct()
+                .toList();
 
-		// 2. 각 청약(Subscription)을 순회하며 담보 코드 Set으로 변환
-		return subscriptions.stream().map(subscription -> {
-			// 3. 해당 청약에 묶인 스냅샷에서 '담보 코드'만 추출하여 Set으로 만듦
-			Set<String> coverageCodes = subscription.getSnapshots()
-				.stream()
-				.map(SubscriptionSnapshotEntity::getConditionCode)
-				.collect(Collectors.toSet());
+        if (subscriptionIds.isEmpty()) {
+            return List.of();
+        }
 
-			return new PastContractCoverage(coverageCodes);
-		}).collect(Collectors.toList());
-	}
+
+        List<SubscriptionCoverageEntity> allCoverages =
+                subscriptionCoverageJpaRepository.findBySubscriptionIdIn(subscriptionIds);
+
+
+        Map<Long, Set<String>> coverageSetsMap = allCoverages.stream()
+                .collect(Collectors.groupingBy(
+                        SubscriptionCoverageEntity::getSubscriptionId,
+                        Collectors.mapping(SubscriptionCoverageEntity::getConditionCode, Collectors.toSet())
+                ));
+
+
+        return coverageSetsMap.values().stream()
+                .map(PastContractCoverage::new)
+                .collect(Collectors.toList());
+    }
 
 }

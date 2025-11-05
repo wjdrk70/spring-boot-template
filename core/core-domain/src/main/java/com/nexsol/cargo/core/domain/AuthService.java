@@ -11,20 +11,37 @@ public class AuthService {
 
 	private final UserReader userReader;
 
-	private final UserAppender userAppender;
+	private final UserRepository userRepository;
+
+	private final UserProfileRepository userProfileRepository;
 
 	private final JwtService jwtService;
 
 	private final PasswordEncoder passwordEncoder;
 
-	public User signUp(User user) {
+	public UserInfo signUp(User user, UserProfile profile) {
 		userReader.findUser(user.getCompanyCode());
-
 		String hashedPassword = passwordEncoder.encode(user.getPassword());
 
-		User newUser = userAppender.append(user, hashedPassword);
+		User userToSave = User.builder()
+			.companyCode(user.getCompanyCode())
+			.password(hashedPassword)
+			.role(user.getRole())
+			.build();
+		User savedUser = userRepository.save(userToSave);
 
-		return newUser;
+		UserProfile profileToSave = UserProfile.builder()
+			.userId(savedUser.getId())
+			.userName(profile.getUserName())
+			.companyName(profile.getCompanyName())
+			.managerName(profile.getManagerName())
+			.phoneNumber(profile.getPhoneNumber())
+			.email(profile.getEmail())
+			.address(profile.getAddress())
+			.build();
+		UserProfile savedProfile = userProfileRepository.save(profileToSave);
+
+		return new UserInfo(null, savedUser, savedProfile);
 	}
 
 	public UserInfo signIn(String companyCode, String password) {
@@ -37,10 +54,12 @@ public class AuthService {
 			throw new CoreException(CoreErrorType.AUTH_UNAUTHORIZED);
 		}
 
+		UserProfile profile = userReader.readProfile(existUser.getId());
+
 		JwtPayload payload = new JwtPayload(existUser.getId());
 		String token = jwtService.sign(payload);
 
-		return new UserInfo(token, existUser);
+		return new UserInfo(token, existUser, profile);
 	}
 
 }
