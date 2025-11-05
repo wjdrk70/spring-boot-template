@@ -1,17 +1,15 @@
 package com.nexsol.cargo.core.domain;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.math.BigDecimal;
 import java.util.List;
 
-@Getter
-@RequiredArgsConstructor
-public class RecommendPlan {
+/**
+ * @param planName        e.g., "플랜 A"
+ * @param baseCoverage    기본 담보 (1개)
+ * @param optionCoverages 옵션 담보 (N개)
+ * @param premium         계산된 최종 보험료
+ */
+public record RecommendPlan(String planName, BaseCoverage baseCoverage, List<OptionCoverage> optionCoverages,
+                            BigDecimal premium) {
 
-    private final String planName; // e.g., "플랜 A"
-    private final BaseCoverage baseCoverage; // 기본 담보 (1개)
-    private final List<OptionCoverage> optionCoverages; // 옵션 담보 (N개)
-    private final BigDecimal premium; // 계산된 최종 보험료
 }

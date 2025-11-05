@@ -22,12 +22,12 @@ public class PlanResponse {
     private List<CoverageResponse> extensionCoverages; // 확장조건
 
     public static PlanResponse fromDomain(RecommendPlan plan) {
-        BaseCoverage base = plan.getBaseCoverage();
-        List<OptionCoverage> options = plan.getOptionCoverages();
+        BaseCoverage base = plan.baseCoverage();
+        List<OptionCoverage> options = plan.optionCoverages();
 
         return PlanResponse.builder()
-                .planName(plan.getPlanName())
-                .premium(plan.getPremium())
+                .planName(plan.planName())
+                .premium(plan.premium())
                 .baseCoverage(CoverageResponse.builder()
                         .code(base.getCode())
                         .name(base.getName())

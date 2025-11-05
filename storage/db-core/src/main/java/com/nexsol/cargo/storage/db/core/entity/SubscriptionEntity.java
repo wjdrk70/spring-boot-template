@@ -3,8 +3,6 @@ package com.nexsol.cargo.storage.db.core.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -42,9 +40,11 @@ public class SubscriptionEntity extends BaseEntity {
     @Column(name = "hs_code") // 추가된 컬럼
     private String hsCode;
 
-    @Column(name="ocr_data_snapshot",columnDefinition = "json")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String ocrDataSnapshot;
+    @Column(name="invoice_amount")
+    private BigDecimal invoiceAmount;
+
+    @Column(name="currency_unit")
+    private String currencyUnit;
 
     @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SubscriptionSnapshotEntity> snapshots;

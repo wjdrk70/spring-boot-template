@@ -26,13 +26,15 @@ public class PlanController {
     public ApiResponse<List<PlanResponse>> recommendPlans(
             @Valid @RequestBody PlanRequest request) {
 
-        // 1. [Presentation Layer]가 [Business Layer(Domain Service)]를 호출
+
         List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(
                 request.hsCode(),
-                request.invoiceAmount()
+                request.invoiceAmount(),
+                request.currencyUnit(),
+                request.exchangeRateAmount()
         );
 
-        // 2. Domain 객체를 Response DTO로 변환하여 반환
+       
         List<PlanResponse> response = recommendedPlans.stream()
                 .map(PlanResponse::fromDomain)
                 .collect(Collectors.toList());
