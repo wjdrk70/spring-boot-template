@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "payment_detail")
 @Entity
 @NoArgsConstructor
-public class PaymentDetail extends BaseEntity {
+public class PaymentDetailEntity extends BaseEntity {
 
     @OneToOne
     @MapsId
