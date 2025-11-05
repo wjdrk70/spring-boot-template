@@ -11,18 +11,19 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CoverageMasterReader {
 
-    private final CoverageMasterRepository coverageMasterRepository;
+	private final CoverageMasterRepository coverageMasterRepository;
 
-    public CoverageMaster findValidatedMaster(Set<String> codeSet) {
+	public CoverageMaster findValidatedMaster(Set<String> codeSet) {
 
-        CoverageMaster masterSet = coverageMasterRepository.findCoveragesByCode(codeSet);
+		CoverageMaster masterSet = coverageMasterRepository.findCoveragesByCode(codeSet);
 
-        // 필수 담보(Base Coverage) 누락 검증
-        if (masterSet.baseCoverage() == null) {
+		// 필수 담보(Base Coverage) 누락 검증
+		if (masterSet.baseCoverage() == null) {
 
-            throw new CoreException(CoreErrorType.NOT_FOUND_DATA);
-        }
+			throw new CoreException(CoreErrorType.NOT_FOUND_DATA);
+		}
 
-        return masterSet;
-    }
+		return masterSet;
+	}
+
 }

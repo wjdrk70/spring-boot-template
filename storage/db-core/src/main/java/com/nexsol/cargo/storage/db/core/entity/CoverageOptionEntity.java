@@ -11,21 +11,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CoverageOptionEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(name = "code", unique = true, nullable = false)
-    private String code;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+	@Column(name = "code", unique = true, nullable = false)
+	private String code;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "option_type", nullable = false)
-    private CoverageOptionType optionType;
+	@Column(name = "name", nullable = false)
+	private String name;
 
-    public OptionCoverage toDomain() {
-        return new OptionCoverage(this.code, this.name, this.optionType);
-    }
+	@Enumerated(EnumType.STRING)
+	@Column(name = "option_type", nullable = false)
+	private CoverageOptionType optionType;
+
+	public OptionCoverage toDomain() {
+		return new OptionCoverage(this.code, this.name, this.optionType);
+	}
+
 }

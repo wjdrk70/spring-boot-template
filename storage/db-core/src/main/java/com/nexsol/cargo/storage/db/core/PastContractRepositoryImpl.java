@@ -14,23 +14,23 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class PastContractRepositoryImpl implements PastContractRepository {
-    private final SubscriptionJpaRepository subscriptionJpaRepository;
 
-    @Override
-    public List<PastContractCoverage> findByHsCode(String hsCode) {
-        List<SubscriptionEntity> subscriptions =
-                subscriptionJpaRepository.findByHsCodeWithSnapshots(hsCode);
+	private final SubscriptionJpaRepository subscriptionJpaRepository;
 
-        // 2. 각 청약(Subscription)을 순회하며 담보 코드 Set으로 변환
-        return subscriptions.stream()
-                .map(subscription -> {
-                    // 3. 해당 청약에 묶인 스냅샷에서 '담보 코드'만 추출하여 Set으로 만듦
-                    Set<String> coverageCodes = subscription.getSnapshots().stream()
-                            .map(SubscriptionSnapshotEntity::getConditionCode)
-                            .collect(Collectors.toSet());
+	@Override
+	public List<PastContractCoverage> findByHsCode(String hsCode) {
+		List<SubscriptionEntity> subscriptions = subscriptionJpaRepository.findByHsCodeWithSnapshots(hsCode);
 
-                    return new PastContractCoverage(coverageCodes);
-                })
-                .collect(Collectors.toList());
-    }
+		// 2. 각 청약(Subscription)을 순회하며 담보 코드 Set으로 변환
+		return subscriptions.stream().map(subscription -> {
+			// 3. 해당 청약에 묶인 스냅샷에서 '담보 코드'만 추출하여 Set으로 만듦
+			Set<String> coverageCodes = subscription.getSnapshots()
+				.stream()
+				.map(SubscriptionSnapshotEntity::getConditionCode)
+				.collect(Collectors.toSet());
+
+			return new PastContractCoverage(coverageCodes);
+		}).collect(Collectors.toList());
+	}
+
 }

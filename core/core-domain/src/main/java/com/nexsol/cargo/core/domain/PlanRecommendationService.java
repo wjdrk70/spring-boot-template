@@ -11,28 +11,25 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class PlanRecommendationService {
-    private final PastContactReader pastContactReader;
-    private final PlanProcessor planProcessor;
-    private static final int TOP_N = 3;
 
+	private final PastContactReader pastContactReader;
 
-    public List<RecommendPlan> recommendPlans(String hsCode, BigDecimal invoiceAmount, String
-            currencyUnit, BigDecimal exchangeRateAmount) {
+	private final PlanProcessor planProcessor;
 
-        // 과거 계약을 분석
-        List<Set<String>> topCoverageSets = pastContactReader.readTopCombinations(hsCode, TOP_N);
+	private static final int TOP_N = 3;
 
-        if (topCoverageSets.isEmpty()) {
-            return Collections.emptyList();
-        }
+	public List<RecommendPlan> recommendPlans(String hsCode, BigDecimal invoiceAmount, String currencyUnit,
+			BigDecimal exchangeRateAmount) {
 
-        // 조합 목록을 받아, 마스터 조회 -> 계산 -> 플랜 조립 로직을 위임
-        return planProcessor.assemblePlans(
-                topCoverageSets,
-                invoiceAmount,
-                currencyUnit,
-                exchangeRateAmount
-        );
-    }
+		// 과거 계약을 분석
+		List<Set<String>> topCoverageSets = pastContactReader.readTopCombinations(hsCode, TOP_N);
+
+		if (topCoverageSets.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		// 조합 목록을 받아, 마스터 조회 -> 계산 -> 플랜 조립 로직을 위임
+		return planProcessor.assemblePlans(topCoverageSets, invoiceAmount, currencyUnit, exchangeRateAmount);
+	}
 
 }

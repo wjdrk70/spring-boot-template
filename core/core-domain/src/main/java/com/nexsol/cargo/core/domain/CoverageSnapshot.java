@@ -1,6 +1,6 @@
 package com.nexsol.cargo.core.domain;
 
-public record CoverageSnapshot(String conditionType,
-                               String conditionCode,
-                               String conditionName) {
+import com.nexsol.cargo.core.enums.ConditionType;
+
+public record CoverageSnapshot(ConditionType conditionType, String conditionCode, String conditionName) {
 }

@@ -20,25 +20,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlanController {
 
-    private final PlanRecommendationService planRecommendationService;
+	private final PlanRecommendationService planRecommendationService;
 
-    @PostMapping("/recommend")
-    public ApiResponse<List<PlanResponse>> recommendPlans(
-            @Valid @RequestBody PlanRequest request) {
+	@PostMapping("/recommend")
+	public ApiResponse<List<PlanResponse>> recommendPlans(@Valid @RequestBody PlanRequest request) {
 
+		List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(request.hsCode(),
+				request.invoiceAmount(), request.currencyUnit(), request.exchangeRateAmount());
 
-        List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(
-                request.hsCode(),
-                request.invoiceAmount(),
-                request.currencyUnit(),
-                request.exchangeRateAmount()
-        );
+		List<PlanResponse> response = recommendedPlans.stream()
+			.map(PlanResponse::fromDomain)
+			.collect(Collectors.toList());
 
-       
-        List<PlanResponse> response = recommendedPlans.stream()
-                .map(PlanResponse::fromDomain)
-                .collect(Collectors.toList());
+		return ApiResponse.success(response);
+	}
 
-        return ApiResponse.success(response);
-    }
 }

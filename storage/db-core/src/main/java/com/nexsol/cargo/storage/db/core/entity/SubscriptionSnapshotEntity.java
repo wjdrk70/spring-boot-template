@@ -1,5 +1,7 @@
 package com.nexsol.cargo.storage.db.core.entity;
 
+import com.nexsol.cargo.core.domain.CoverageSnapshot;
+import com.nexsol.cargo.core.enums.ConditionType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,24 +13,46 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class SubscriptionSnapshotEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_id")
-    private SubscriptionEntity subscription;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "condition_code", nullable = false)
-    private String conditionCode;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "subscription_id")
+	private SubscriptionEntity subscription;
 
-    // (필요시 'condition_type', 'condition_name' 등 다른 컬럼도 추가)
+	@Column(name = "condition_code", nullable = false)
+	private String conditionCode;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@Column(name = "condition_name", nullable = false)
+	private String conditionName;
 
-    // 편의를 위해 subscription_id를 직접 반환하는 getter
-    public Long getSubscriptionId() {
-        return (subscription != null) ? subscription.getId() : null;
-    }
+	@Enumerated(EnumType.STRING)
+	@Column(name = "condition_type", nullable = false)
+	private ConditionType conditionType;
+
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+
+	public static SubscriptionSnapshotEntity fromDomain(CoverageSnapshot snapshot, SubscriptionEntity subscription) {
+		SubscriptionSnapshotEntity entity = new SubscriptionSnapshotEntity();
+		entity.conditionType = snapshot.conditionType();
+		entity.conditionCode = snapshot.conditionCode();
+		entity.conditionName = snapshot.conditionName();
+		entity.subscription = subscription;
+		entity.createdAt = LocalDateTime.now();
+		return entity;
+	}
+
+	public CoverageSnapshot toDomain() {
+		return new CoverageSnapshot(this.conditionType, this.conditionCode, this.conditionName
+
+		);
+	}
+
+	public Long getSubscriptionId() {
+		return (subscription != null) ? subscription.getId() : null;
+	}
+
 }

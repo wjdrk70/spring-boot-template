@@ -7,7 +7,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class OptionCoverage {
-    private final String code;
-    private final String name;
-    private final CoverageOptionType type;
+
+	private final String code;
+
+	private final String name;
+
+	private final CoverageOptionType type;
+
 }

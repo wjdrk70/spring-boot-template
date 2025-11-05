@@ -1,16 +1,26 @@
 package com.nexsol.cargo.core.domain;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
+@RequiredArgsConstructor
 public class SubscriptionService {
- private final SubscriptionRepository subscriptionRepository;
 
- public Long complete(Subscription subscription){
-     Subscription savedSubscription = subscriptionRepository.save(subscription); // [수정] SubscriptionCommand -> Subscription
+	private final SubscriptionValidator subscriptionValidator;
 
-     // ...
+	private final SubscriptionProcessor processor;
 
-     return savedSubscription.id();
- }
+	@Transactional
+	public SubscriptionResult create(CreateSubscription creation) {
+		BigDecimal premium = subscriptionValidator.validatePremium(creation);
+
+		Subscription savedSubscription = processor.createSubscription(creation, premium);
+
+		return new SubscriptionResult(savedSubscription.id(), savedSubscription.insurancePremium());
+	}
+
 }

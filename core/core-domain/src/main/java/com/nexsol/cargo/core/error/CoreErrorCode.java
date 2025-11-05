@@ -7,4 +7,7 @@ enum CoreErrorCode {
 	// Auth
 	C1001, C1002, C1003,
 
+	// Plan
+	C2000;
+
 }

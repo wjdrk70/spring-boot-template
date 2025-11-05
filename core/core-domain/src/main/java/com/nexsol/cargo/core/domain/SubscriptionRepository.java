@@ -2,5 +2,6 @@ package com.nexsol.cargo.core.domain;
 
 public interface SubscriptionRepository {
 
-    Subscription save(Subscription subscription);
+	Subscription save(Subscription subscription);
+
 }

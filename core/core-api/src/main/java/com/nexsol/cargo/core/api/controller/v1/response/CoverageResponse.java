@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CoverageResponse {
-    private String code;
-    private String name;
 
+	private String code;
+
+	private String name;
 
 }

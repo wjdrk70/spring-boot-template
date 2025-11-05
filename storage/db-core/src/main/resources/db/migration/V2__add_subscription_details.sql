@@ -1,4 +1,4 @@
-- --- 1. subscription 테이블에 핵심 분석 컬럼 추가 ---
+-- --- 1. subscription 테이블에 핵심 분석 컬럼 추가 ---
 -- 송장가액 (보험가입금액의 원본값), 화폐단위
 ALTER TABLE subscription
     ADD COLUMN invoice_amount DECIMAL(19, 4) NOT NULL COMMENT '송장가액 (외화 기준)',
@@ -36,7 +36,7 @@ CREATE TABLE payment_detail
     subscription_id      BIGINT PRIMARY KEY COMMENT 'subscription.id 참조',
 
     -- 결제 방식 (TODO:외부 Payment API 추후 연동)
-    payment_method       VARCHAR(50) NOT NULL COMMENT '결제 수단 (CARD, PAY, BANK)',
+    payment_method       VARCHAR(50) NULL COMMENT '결제 수단 (CARD, PAY, BANK)',
     card_type            VARCHAR(50) NULL COMMENT '카드 종류 (선택)',
     card_number_masked   VARCHAR(50) NULL COMMENT '마스킹된 카드 번호 (1234-****-****-5678)',
     expiry_date          VARCHAR(10) NULL COMMENT '유효기간 (MM/YYYY)',

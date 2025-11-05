@@ -4,5 +4,6 @@ import java.util.Set;
 
 public interface CoverageMasterRepository {
 
-    CoverageMaster findCoveragesByCode(Set<String> code);
+	CoverageMaster findCoveragesByCode(Set<String> code);
+
 }

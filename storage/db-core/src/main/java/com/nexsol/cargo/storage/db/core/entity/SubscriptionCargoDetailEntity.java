@@ -1,48 +1,83 @@
 package com.nexsol.cargo.storage.db.core.entity;
 
+import com.nexsol.cargo.core.domain.CargoDetail;
 import com.nexsol.cargo.core.enums.ConveyanceType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 
 @Getter
 @Table(name = "subscription_cargo_detail")
 @Entity
 @NoArgsConstructor
-public class SubscriptionCargoDetailEntity extends BaseEntity {
+public class SubscriptionCargoDetailEntity {
 
-    @OneToOne
-    @MapsId // BaseEntity.id에 subscription.id 값을 매핑
-    @JoinColumn(name = "subscription_id")
-    private SubscriptionEntity subscription;
+	@Id
+	@Column(name = "subscription_id")
+	private Long id;
 
-    @Column(name = "ref_no")
-    private String refNo;
+	@OneToOne
+	@MapsId // BaseEntity.id에 subscription.id 값을 매핑
+	@JoinColumn(name = "subscription_id")
+	private SubscriptionEntity subscription;
 
-    @Column(name = "bl_no")
-    private String blNo;
+	@Column(name = "ref_no")
+	private String refNo;
 
-    @Column(name = "outbound_date")
-    private LocalDate outboundDate;
+	@Column(name = "bl_no")
+	private String blNo;
 
-    @Column
-    private String origin;
+	@Column(name = "outbound_date")
+	private LocalDate outboundDate;
 
-    @Column
-    private String destination;
+	@Column
+	private String origin;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private ConveyanceType conveyance;
+	@Column
+	private String destination;
 
-    @Column(name = "packing_type")
-    private String PackingType;
+	@Enumerated(EnumType.STRING)
+	@Column
+	private ConveyanceType conveyance;
 
-    @Column(name = "cargo_item_name")
-    private String cargoItemName;
+	@Column(name = "packing_type")
+	private String packingType;
 
+	@Column(name = "cargo_item_name")
+	private String cargoItemName;
+
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	@Column(name = "updated_at", nullable = false)
+	private LocalDateTime updatedAt;
+
+	public static SubscriptionCargoDetailEntity fromDomain(CargoDetail domain, SubscriptionEntity subscription) {
+		SubscriptionCargoDetailEntity entity = new SubscriptionCargoDetailEntity();
+		entity.subscription = subscription;
+		entity.id = subscription.getId();
+		entity.refNo = domain.refNo();
+		entity.blNo = domain.blNo();
+		entity.outboundDate = domain.outboundDate();
+		entity.origin = domain.origin();
+		entity.destination = domain.destination();
+		entity.conveyance = domain.conveyance();
+		entity.packingType = domain.packingType();
+		entity.cargoItemName = domain.cargoDetailName();
+		return entity;
+
+	}
+
+	public CargoDetail toDomain() {
+		return new CargoDetail(this.refNo, this.blNo, this.outboundDate, this.origin, this.destination, this.conveyance,
+				this.packingType, this.cargoItemName);
+	}
 
 }

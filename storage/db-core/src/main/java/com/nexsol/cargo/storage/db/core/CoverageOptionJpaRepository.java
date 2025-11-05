@@ -7,5 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface CoverageOptionJpaRepository extends JpaRepository<CoverageOptionEntity, Long> {
-    List<CoverageOptionEntity> findByCodeIn(Set<String> codes);
+
+	List<CoverageOptionEntity> findByCodeIn(Set<String> codes);
+
 }
