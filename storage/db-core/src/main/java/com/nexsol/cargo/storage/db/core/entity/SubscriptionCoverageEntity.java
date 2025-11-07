@@ -1,6 +1,6 @@
 package com.nexsol.cargo.storage.db.core.entity;
 
-import com.nexsol.cargo.core.domain.CoverageSnapshot;
+import com.nexsol.cargo.core.domain.SubscriptionCoverage;
 import com.nexsol.cargo.core.enums.ConditionType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,8 +18,8 @@ public class SubscriptionCoverageEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-    @Column(name = "subscription_id", nullable = false)
-    private Long subscriptionId;
+	@Column(name = "subscription_id", nullable = false)
+	private Long subscriptionId;
 
 	@Column(name = "condition_code", nullable = false)
 	private String conditionCode;
@@ -34,16 +34,22 @@ public class SubscriptionCoverageEntity {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
-    public static SubscriptionCoverageEntity fromDomain(CoverageSnapshot snapshot, Long newSubscriptionId) {
-        SubscriptionCoverageEntity entity = new SubscriptionCoverageEntity();
-        entity.subscriptionId = newSubscriptionId;
-        entity.conditionType = snapshot.conditionType();
-        entity.conditionCode = snapshot.conditionCode();
-        entity.conditionName = snapshot.conditionName();
-        entity.createdAt = LocalDateTime.now();
-        return entity;
-    }
-    public CoverageSnapshot toDomain() {
-        return new CoverageSnapshot(this.conditionType, this.conditionCode, this.conditionName);
-    }
+	public static SubscriptionCoverageEntity fromDomain(SubscriptionCoverage coverage, Long newSubscriptionId) {
+		SubscriptionCoverageEntity entity = new SubscriptionCoverageEntity();
+		entity.subscriptionId = newSubscriptionId;
+		entity.conditionType = coverage.conditionType();
+		entity.conditionCode = coverage.conditionCode();
+		entity.conditionName = coverage.conditionName();
+		entity.createdAt = LocalDateTime.now();
+		return entity;
+	}
+
+	public SubscriptionCoverage toDomain() {
+		return SubscriptionCoverage.builder()
+			.conditionCode(this.conditionCode)
+			.conditionName(this.conditionName)
+			.conditionType(this.conditionType)
+			.build();
+	}
+
 }

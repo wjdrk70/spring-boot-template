@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Getter
 @Table(name = "subscription")
 @Entity
@@ -18,6 +20,9 @@ public class SubscriptionEntity extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
 	private SubscriptionStatus status;
+
+	@Column(name = "insurance_premium", nullable = false)
+	private BigDecimal insurancePremium;
 
 	@Column(name = "is_same")
 	private Boolean isSame;
@@ -34,27 +39,19 @@ public class SubscriptionEntity extends BaseEntity {
 	@Column(name = "insured_company_code")
 	private String insuredCompanyCode;
 
-
 	public static SubscriptionEntity fromDomain(Subscription domain) {
 		SubscriptionEntity entity = new SubscriptionEntity();
 
-        entity.userId = domain.userId();
-        entity.status = domain.status();
-        entity.isSame = domain.isSame();
-        entity.policyholderCompanyName = domain.policyholderCompanyName();
-        entity.policyholderCompanyCode = domain.policyholderCompanyCode();
-        entity.insuredCompanyName = domain.insuredCompanyName();
-        entity.insuredCompanyCode = domain.insuredCompanyCode();
+		entity.userId = domain.getUserId();
+		entity.status = domain.getStatus();
+		entity.insurancePremium = domain.getInsurancePremium();
+		entity.isSame = domain.isSame();
+		entity.policyholderCompanyName = domain.getPolicyholderCompanyName();
+		entity.policyholderCompanyCode = domain.getPolicyholderCompanyCode();
+		entity.insuredCompanyName = domain.getInsuredCompanyName();
+		entity.insuredCompanyCode = domain.getInsuredCompanyCode();
 
 		return entity;
 	}
-
-//    public Subscription toDomain(CargoDetail cargoDetail, List<CoverageSnapshot> snapshots) {
-//        return new Subscription(this.getId(), this.userId, this.status,
-//                null,
-//                this.isSame, this.policyholderCompanyName, this.policyholderCompanyCode,
-//                this.insuredCompanyName, this.insuredCompanyCode,
-//                cargoDetail, snapshots);
-//    }
 
 }

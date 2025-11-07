@@ -21,21 +21,21 @@ public class PlanProcessor {
 
 	private static final char SECOND_PLAN_NAME = 'A';
 
-	public List<RecommendPlan> assemblePlans(List<Set<String>> topCoverageSets, BigDecimal invoiceAmount,
-			String currencyUnit, BigDecimal exchangeRateAmount) {
+	public List<RecommendPlan> assemblePlans(List<Set<String>> topCoverageSets, Quotation quotation) {
 
 		AtomicInteger rank = new AtomicInteger(0);
+		CargoDetail cargoDetail = quotation.toCargoDetail();
 
 		return topCoverageSets.stream().map(codeSet -> {
 
 			CoverageMaster masterSet = masterReader.findValidatedMaster(codeSet);
 
-			// 보험료 계산
-			BigDecimal premium = premiumCalculator.calculate(invoiceAmount, masterSet.baseCoverage(),
-					masterSet.options(), currencyUnit, exchangeRateAmount);
-
+			BigDecimal premium = premiumCalculator.calculate(cargoDetail, quotation.getExchangeRateAmount(),
+					masterSet.baseCoverage(), masterSet.options());
 			String planName = FIRST_PLAN_NAME + (char) (SECOND_PLAN_NAME + rank.getAndIncrement());
+
 			return new RecommendPlan(planName, masterSet.baseCoverage(), masterSet.options(), premium);
+
 		}).collect(Collectors.toList());
 	}
 

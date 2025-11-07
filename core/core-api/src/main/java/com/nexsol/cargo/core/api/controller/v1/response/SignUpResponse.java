@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.api.controller.v1.response;
 
 import com.nexsol.cargo.core.domain.User;
+import com.nexsol.cargo.core.domain.UserProfile;
 import com.nexsol.cargo.core.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,13 +24,13 @@ public class SignUpResponse {
 
 	private UserRole role;
 
-	public static SignUpResponse fromDomain(User user) {
+	public static SignUpResponse fromDomain(User user, UserProfile profile) {
 		return SignUpResponse.builder()
 			.userId(user.getId())
 			.companyCode(user.getCompanyCode())
-			.companyName(user.getProfile().getCompanyName())
-			.email(user.getProfile().getEmail())
-			.userName(user.getProfile().getUserName())
+			.companyName(profile.getCompanyName())
+			.email(profile.getEmail())
+			.userName(profile.getUserName())
 			.role(user.getRole())
 			.build();
 	}

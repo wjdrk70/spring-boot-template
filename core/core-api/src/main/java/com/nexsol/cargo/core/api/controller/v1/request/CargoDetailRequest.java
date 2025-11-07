@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -34,12 +35,23 @@ public class CargoDetailRequest {
 	@NotBlank(message = "포장 구분은 필수입니다.")
 	private String packingType;
 
-	@NotBlank(message = "품목 상세는 필수입니다.")
-	private String cargoDetailName;
+	@NotBlank(message = "품목명은 필수입니다.")
+	private String cargoItemName;
 
-	public CargoDetail toDomain() {
-		return new CargoDetail(refNo, blNo, outboundDate, origin, destination, conveyance, packingType,
-				cargoDetailName);
+	public CargoDetail toDomain(String hsCode, BigDecimal invoiceAmount, String currencyUnit) {
+		return CargoDetail.builder()
+			.hsCode(hsCode)
+			.invoiceAmount(invoiceAmount)
+			.currencyUnit(currencyUnit)
+			.refNo(this.refNo)
+			.blNo(this.blNo)
+			.outboundDate(this.outboundDate)
+			.origin(this.origin)
+			.destination(this.destination)
+			.conveyance(this.conveyance)
+			.packingType(this.packingType)
+			.cargoItemName(this.cargoItemName)
+			.build();
 	}
 
 }

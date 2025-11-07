@@ -1,6 +1,5 @@
 package com.nexsol.cargo.core.api.controller.v1.response;
 
-import com.nexsol.cargo.core.domain.PaymentDetail;
 import com.nexsol.cargo.core.domain.SubscriptionResult;
 import com.nexsol.cargo.core.enums.PaymentStatus;
 import lombok.Builder;
@@ -18,11 +17,10 @@ public class CreateSubscriptionResponse {
 
 	private PaymentStatus paymentStatus;
 
-	public static CreateSubscriptionResponse of(SubscriptionResult subscriptionResult, PaymentDetail paymentDetail) {
+	public static CreateSubscriptionResponse of(SubscriptionResult subscriptionResult) {
 		return CreateSubscriptionResponse.builder()
 			.subscriptionId(subscriptionResult.subscriptionId())
 			.insurancePremium(subscriptionResult.insurancePremium())
-			.paymentStatus(paymentDetail.paymentStatus())
 			.build();
 	}
 

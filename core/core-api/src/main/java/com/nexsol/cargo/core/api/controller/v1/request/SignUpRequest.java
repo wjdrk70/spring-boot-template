@@ -49,24 +49,23 @@ public class SignUpRequest {
 
 	private String addressDetail;
 
-	public User toDomain() {
-		return User.builder()
-			.companyCode(this.companyCode)
-			.password(this.password)
-			.role(UserRole.ADMIN) // 현재는 ADMIN만 사용
-			.profile(UserProfile.builder()
-				.userName(this.userName)
-				.companyName(this.companyName)
-				.managerName(this.managerName)
-				.phoneNumber(this.phoneNumber)
-				.email(this.email)
-				.address(Address.builder()
-					.zipCode(this.zipCode)
-					.addressLine(this.addressLine)
-					.addressDetail(this.addressDetail)
-					.build())
+	public User toUserDomain() {
+		return User.builder().companyCode(this.companyCode).password(this.password).role(UserRole.ADMIN).build();
+	}
+
+	public UserProfile toProfileDomain() {
+		return UserProfile.builder()
+			.userName(this.userName)
+			.companyName(this.companyName)
+			.managerName(this.managerName)
+			.phoneNumber(this.phoneNumber)
+			.email(this.email)
+			.address(Address.builder()
+				.zipCode(this.zipCode)
+				.addressLine(this.addressLine)
+				.addressDetail(this.addressDetail)
 				.build())
 			.build();
-	};
+	}
 
 }

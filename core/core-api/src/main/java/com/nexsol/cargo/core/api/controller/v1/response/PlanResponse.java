@@ -43,7 +43,7 @@ public class PlanResponse {
 
 	private static List<CoverageResponse> filterOptions(List<OptionCoverage> options, CoverageOptionType type) {
 		return options.stream()
-			.filter(o -> o.getType() == type)
+			.filter(o -> o.getOptionType() == type)
 			.map(o -> CoverageResponse.builder().code(o.getCode()).name(o.getName()).build())
 			.collect(Collectors.toList());
 	}

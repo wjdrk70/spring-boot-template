@@ -1,0 +1,5 @@
+dependencies {
+//   api 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation "io.sentry:sentry-logback:8.25.0"
+}

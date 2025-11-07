@@ -1,39 +1,46 @@
 package com.nexsol.cargo.storage.db.core;
 
-import com.nexsol.cargo.core.domain.PaymentDetail;
+import com.nexsol.cargo.core.domain.Payment;
 import com.nexsol.cargo.core.domain.PaymentRepository;
-import com.nexsol.cargo.core.error.CoreErrorType;
-import com.nexsol.cargo.core.error.CoreException;
-import com.nexsol.cargo.storage.db.core.entity.PaymentDetailEntity;
-import com.nexsol.cargo.storage.db.core.entity.SubscriptionEntity;
-import jakarta.persistence.EntityManager;
+import com.nexsol.cargo.core.enums.PaymentStatus;
+import com.nexsol.cargo.storage.db.core.entity.PaymentEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class PaymentRepositoryImpl implements PaymentRepository {
 
-	private final PaymentDetailJpaRepository paymentDetailJpaRepository;
-
-	private final SubscriptionJpaRepository subscriptionJpaRepository;
-
-	private final EntityManager entityManager;
+	private final PaymentJpaRepository paymentJpaRepository;
 
 	@Override
-	public PaymentDetail save(PaymentDetail paymentDetail) {
-		SubscriptionEntity subscriptionEntity = subscriptionJpaRepository.findById(paymentDetail.subscriptionId())
-			.orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA));
+	public Payment save(Payment payment) {
 
-		if (!entityManager.contains(subscriptionEntity)) {
-			subscriptionEntity = entityManager.merge(subscriptionEntity);
-		}
+		PaymentEntity entity = PaymentEntity.fromDomain(payment);
 
-		PaymentDetailEntity entity = PaymentDetailEntity.fromDomain(paymentDetail, subscriptionEntity);
-
-		PaymentDetailEntity savedEntity = paymentDetailJpaRepository.save(entity);
+		PaymentEntity savedEntity = paymentJpaRepository.save(entity);
 
 		return savedEntity.toDomain();
+	}
+
+	@Override
+	public Optional<Payment> findById(Long paymentId) {
+		return paymentJpaRepository.findById(paymentId).map(PaymentEntity::toDomain);
+	}
+
+	@Override
+	public Optional<Payment> findByTidAndStatus(String tid, PaymentStatus status) {
+		try {
+			Long paymentId = Long.parseLong(tid);
+			return paymentJpaRepository.findById(paymentId)
+				.filter(payment -> payment.getPaymentStatus() == status)
+				.map(PaymentEntity::toDomain);
+		}
+		catch (NumberFormatException e) {
+			return Optional.empty(); // (TID가 Long이 아닌 경우)
+		}
 	}
 
 }

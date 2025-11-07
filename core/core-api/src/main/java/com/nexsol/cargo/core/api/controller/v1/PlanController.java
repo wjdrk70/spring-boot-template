@@ -25,8 +25,7 @@ public class PlanController {
 	@PostMapping("/recommend")
 	public ApiResponse<List<PlanResponse>> recommendPlans(@Valid @RequestBody PlanRequest request) {
 
-		List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(request.hsCode(),
-				request.invoiceAmount(), request.currencyUnit(), request.exchangeRateAmount());
+		List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(request.quotationKey());
 
 		List<PlanResponse> response = recommendedPlans.stream()
 			.map(PlanResponse::fromDomain)

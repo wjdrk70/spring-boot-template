@@ -16,36 +16,30 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PastContractRepositoryImpl implements PastContractRepository {
 
-    private final SubscriptionCargoJpaRepository subscriptionCargoJpaRepository;
-    private final SubscriptionCoverageJpaRepository subscriptionCoverageJpaRepository;
+	private final SubscriptionCargoJpaRepository subscriptionCargoJpaRepository;
 
-    @Override
-    public List<PastContractCoverage> findByHsCode(String hsCode) {
-        List<Long> subscriptionIds = subscriptionCargoJpaRepository.findByHsCode(hsCode)
-                .stream()
-                .map(SubscriptionCargoEntity::getSubscriptionId)
-                .distinct()
-                .toList();
+	private final SubscriptionCoverageJpaRepository subscriptionCoverageJpaRepository;
 
-        if (subscriptionIds.isEmpty()) {
-            return List.of();
-        }
+	@Override
+	public List<PastContractCoverage> findByHsCode(String hsCode) {
+		List<Long> subscriptionIds = subscriptionCargoJpaRepository.findByHsCode(hsCode)
+			.stream()
+			.map(SubscriptionCargoEntity::getSubscriptionId)
+			.distinct()
+			.toList();
 
+		if (subscriptionIds.isEmpty()) {
+			return List.of();
+		}
 
-        List<SubscriptionCoverageEntity> allCoverages =
-                subscriptionCoverageJpaRepository.findBySubscriptionIdIn(subscriptionIds);
+		List<SubscriptionCoverageEntity> allCoverages = subscriptionCoverageJpaRepository
+			.findBySubscriptionIdIn(subscriptionIds);
 
+		Map<Long, Set<String>> coverageSetsMap = allCoverages.stream()
+			.collect(Collectors.groupingBy(SubscriptionCoverageEntity::getSubscriptionId,
+					Collectors.mapping(SubscriptionCoverageEntity::getConditionCode, Collectors.toSet())));
 
-        Map<Long, Set<String>> coverageSetsMap = allCoverages.stream()
-                .collect(Collectors.groupingBy(
-                        SubscriptionCoverageEntity::getSubscriptionId,
-                        Collectors.mapping(SubscriptionCoverageEntity::getConditionCode, Collectors.toSet())
-                ));
-
-
-        return coverageSetsMap.values().stream()
-                .map(PastContractCoverage::new)
-                .collect(Collectors.toList());
-    }
+		return coverageSetsMap.values().stream().map(PastContractCoverage::new).collect(Collectors.toList());
+	}
 
 }

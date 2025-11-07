@@ -10,24 +10,23 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SubscriptionReader {
 
-    private final SubscriptionRepository subscriptionRepository;
+	private final SubscriptionRepository subscriptionRepository;
 
-    public Subscription read(Long subscriptionId, Long userId) {
-        // (구현 예시)
-        Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA));
+	public Subscription read(Long subscriptionId, Long userId) {
+		// (구현 예시)
+		Subscription subscription = subscriptionRepository.findById(subscriptionId)
+			.orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA));
 
+		if (!subscription.getUserId().equals(userId)) {
 
-        if (!subscription.userId().equals(userId)) {
+			throw new CoreException(CoreErrorType.AUTH_UNAUTHORIZED);
+		}
 
-            throw new CoreException(CoreErrorType.AUTH_UNAUTHORIZED);
-        }
+		if (subscription.getStatus() != SubscriptionStatus.PAYMENT_PENDING) {
 
+		}
 
-        if (subscription.status() != SubscriptionStatus.PAYMENT_PENDING) {
+		return subscription;
+	}
 
-        }
-
-        return subscription;
-    }
 }

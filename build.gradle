@@ -34,10 +34,10 @@ subprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok:1.18.42")
         annotationProcessor("org.projectlombok:lombok:1.18.42")
-
-        testCompileOnly("org.projectlombok:lombok:1.18.42")
+        testImplementation("org.assertj:assertj-core:3.27.3")
         testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testCompileOnly("org.projectlombok:lombok:1.18.42")
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     }
@@ -54,9 +54,35 @@ subprojects {
             extendsFrom annotationProcessor
         }
     }
-}
+
+    test{
+
+        useJUnitPlatform {
+            excludeTags('develop')
+        }
+    }
+
+    tasks.register('unitTest', Test) {
+        group = 'verification'
+        useJUnitPlatform {
+            excludeTags('develop', 'context')
+            includeTags('unit')
+        }
+    }
+
+    tasks.register('contextTest', Test) {
+        group = 'verification'
+        useJUnitPlatform {
+            includeTags('context')
+        }
+    }
 
 
-tasks.named('test') {
-    useJUnitPlatform()
+    tasks.register('developTest', Test) {
+        group = 'verification'
+        useJUnitPlatform {
+            includeTags('develop')
+        }
+    }
 }
+

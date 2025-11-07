@@ -19,6 +19,6 @@ public class CargoItemEntity extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rider_id", nullable = false)
-	private CoverageRiderEntity rider;
+	private CoverageBaseEntity rider;
 
 }

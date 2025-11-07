@@ -17,73 +17,74 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 public class SubscriptionCargoEntity {
-    @Id
-    @Column(name = "subscription_id")
-    private Long subscriptionId; // ⬅️ PK이자 FK
 
-    @Column(name = "hs_code", nullable = false)
-    private String hsCode;
+	@Id
+	@Column(name = "subscription_id")
+	private Long subscriptionId; // ⬅️ PK이자 FK
 
-    @Column(name = "invoice_amount", nullable = false)
-    private BigDecimal invoiceAmount;
+	@Column(name = "hs_code", nullable = false)
+	private String hsCode;
 
-    @Column(name = "currency_unit", nullable = false)
-    private String currencyUnit;
+	@Column(name = "invoice_amount", nullable = false)
+	private BigDecimal invoiceAmount;
 
-    @Column(name = "ref_no")
-    private String refNo;
+	@Column(name = "currency_unit", nullable = false)
+	private String currencyUnit;
 
-    @Column(name = "bl_no")
-    private String blNo;
+	@Column(name = "ref_no")
+	private String refNo;
 
-    @Column(name = "outbound_date")
-    private LocalDate outboundDate;
+	@Column(name = "bl_no")
+	private String blNo;
 
-    @Column
-    private String origin;
+	@Column(name = "outbound_date")
+	private LocalDate outboundDate;
 
-    @Column
-    private String destination;
+	@Column
+	private String origin;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private ConveyanceType conveyance;
+	@Column
+	private String destination;
 
-    @Column(name = "packing_type")
-    private String packingType;
+	@Enumerated(EnumType.STRING)
+	@Column
+	private ConveyanceType conveyance;
 
-    @Column(name = "cargo_item_name")
-    private String cargoItemName;
+	@Column(name = "packing_type")
+	private String packingType;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@Column(name = "cargo_item_name")
+	private String cargoItemName;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 
+	@UpdateTimestamp
+	@Column(name = "updated_at", nullable = false)
+	private LocalDateTime updatedAt;
 
-    public static SubscriptionCargoEntity fromDomain(CargoDetail domain, Long newSubscriptionId) {
-        SubscriptionCargoEntity entity = new SubscriptionCargoEntity();
-        entity.subscriptionId = newSubscriptionId;
-        entity.hsCode = domain.hsCode();
-        entity.invoiceAmount = domain.invoiceAmount();
-        entity.currencyUnit = domain.currencyUnit();
-        entity.refNo = domain.refNo();
-        entity.blNo = domain.blNo();
-        entity.outboundDate = domain.outboundDate();
-        entity.origin = domain.origin();
-        entity.destination = domain.destination();
-        entity.conveyance = domain.conveyance();
-        entity.packingType = domain.packingType();
-        entity.cargoItemName = domain.cargoDetailName();
-        return entity;
-    }
+	public static SubscriptionCargoEntity fromDomain(CargoDetail domain, Long newSubscriptionId) {
+		SubscriptionCargoEntity entity = new SubscriptionCargoEntity();
+		entity.subscriptionId = newSubscriptionId;
+		entity.hsCode = domain.hsCode();
+		entity.invoiceAmount = domain.invoiceAmount();
+		entity.currencyUnit = domain.currencyUnit();
+		entity.refNo = domain.refNo();
+		entity.blNo = domain.blNo();
+		entity.outboundDate = domain.outboundDate();
+		entity.origin = domain.origin();
+		entity.destination = domain.destination();
+		entity.conveyance = domain.conveyance();
+		entity.packingType = domain.packingType();
+		entity.cargoItemName = domain.cargoItemName();
+		return entity;
+	}
 
-    public CargoDetail toDomain() {
-        return new CargoDetail(this.hsCode, this.invoiceAmount, this.currencyUnit, this.refNo,
-                this.blNo, this.outboundDate, this.origin, this.destination,
-                this.conveyance, this.packingType, this.cargoItemName);
-    }
+	public CargoDetail toDomain() {
+		return new CargoDetail(this.hsCode, this.invoiceAmount, this.currencyUnit, this.refNo, this.blNo,
+				this.outboundDate, this.origin, this.destination, this.conveyance, this.packingType,
+				this.cargoItemName);
+	}
+
 }

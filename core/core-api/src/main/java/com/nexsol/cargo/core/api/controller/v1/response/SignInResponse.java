@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.api.controller.v1.response;
 
 import com.nexsol.cargo.core.domain.User;
+import com.nexsol.cargo.core.domain.UserProfile;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,16 +23,15 @@ public class SignInResponse {
 
 	private String email;
 
-	public static SignInResponse fromDomain(String accessToken, User user) {
-
+	public static SignInResponse fromDomain(String accessToken, User user, UserProfile profile) {
 		return SignInResponse.builder()
 			.accessToken(accessToken)
 			.companyCode(user.getCompanyCode())
-			.companyName(user.getProfile().getCompanyName())
-			.userName(user.getProfile().getUserName())
-			.managerName(user.getProfile().getManagerName())
-			.phoneNumber(user.getProfile().getPhoneNumber())
-			.email(user.getProfile().getEmail())
+			.companyName(profile.getCompanyName())
+			.userName(profile.getUserName())
+			.managerName(profile.getManagerName())
+			.phoneNumber(profile.getPhoneNumber())
+			.email(profile.getEmail())
 			.build();
 
 	}

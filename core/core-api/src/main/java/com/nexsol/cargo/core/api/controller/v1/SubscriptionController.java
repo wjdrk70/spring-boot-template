@@ -21,14 +21,12 @@ public class SubscriptionController {
 
 	private final SubscriptionService subscriptionService;
 
-
 	@PostMapping
 	public ApiResponse<CreateSubscriptionResponse> create(@AuthenticationPrincipal Long userId,
 			@Valid @RequestBody CreateSubscriptionRequest request) {
 		CreateSubscription dto = request.toCreateSubscription(userId);
 
 		SubscriptionResult result = subscriptionService.create(dto);
-
 
 		return ApiResponse.success(CreateSubscriptionResponse.of(result));
 
