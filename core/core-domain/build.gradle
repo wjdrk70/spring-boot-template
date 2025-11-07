@@ -1,5 +1,6 @@
 dependencies {
     implementation project(":core:core-enum")
+    implementation project(":support:logging")
     compileOnly 'org.springframework:spring-context'
-//    compileOnly 'org.springframework:spring-tx'
+    compileOnly 'jakarta.transaction:jakarta.transaction-api'
 }

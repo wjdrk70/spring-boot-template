@@ -27,13 +27,13 @@ public class PremiumCalculator {
 
 		// 3. 확장담보요율
 		BigDecimal extensionRate = options.stream()
-			.filter(o -> o.getRateType() == RateType.EXTENSION)
+			.filter(option -> option.getRateType() == RateType.EXTENSION)
 			.map(OptionCoverage::getRate)
 			.reduce(BigDecimal.ZERO, BigDecimal::add); // e.g., 0.0
 
 		// 4. 특약요율 합(Σ)
 		BigDecimal sumOfSpecialClauseRates = options.stream()
-			.filter(o -> o.getRateType() == RateType.SPECIAL_CLAUSE)
+			.filter(option -> option.getRateType() == RateType.SPECIAL_CLAUSE)
 			.map(OptionCoverage::getRate)
 			.reduce(BigDecimal.ZERO, BigDecimal::add); // e.g., 0.005
 

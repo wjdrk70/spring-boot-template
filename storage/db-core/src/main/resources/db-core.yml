@@ -30,8 +30,8 @@ storage:
       jdbc-url: jdbc:h2:mem:core;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
       username: sa
       password:  # 빈 값 또는 생략
-      maximum-pool-size: 10
-      minimum-idle: 2
+      maximum-pool-size: 8
+      minimum-idle: 5
       pool-name: core-db-pool
       data-source-properties:
         rewriteBatchedStatements: true
@@ -39,6 +39,10 @@ storage:
 
 ---
 spring.config.activate.on-profile: local-dev
+spring:
+  docker:
+    compose:
+      enabled: false
 storage:
   datasource:
     core:
@@ -47,7 +51,7 @@ storage:
       password: ${DB_PASSWORD}
       driver-class-name: com.mysql.cj.jdbc.Driver
       hikari:
-        maximum-pool-size: 20
+        maximum-pool-size: 8
         minimum-idle: 5
         idle-timeout: 300000
         connection-timeout: 20000
@@ -68,7 +72,7 @@ storage:
       password: ${DB_PASSWORD}
       driver-class-name: com.mysql.cj.jdbc.Driver
       hikari:
-        maximum-pool-size: 20
+        maximum-pool-size: 8
         minimum-idle: 5
         idle-timeout: 300000
         connection-timeout: 20000

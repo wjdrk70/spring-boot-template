@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @ConfigurationPropertiesScan(basePackages = "com.nexsol.cargo")
 @ComponentScan(basePackages = "com.nexsol.cargo")
-@SpringBootApplication(scanBasePackages = "com.nexsol.cargo",exclude = { UserDetailsServiceAutoConfiguration.class })
+@SpringBootApplication(scanBasePackages = "com.nexsol.cargo", exclude = { UserDetailsServiceAutoConfiguration.class })
 public class CoreApiApplication {
 
 	public static void main(String[] args) {

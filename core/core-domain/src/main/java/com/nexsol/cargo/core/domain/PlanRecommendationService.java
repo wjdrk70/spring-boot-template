@@ -11,11 +11,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PlanRecommendationService {
 
-	private final PastContactReader pastContactReader;
-
-	private final PlanProcessor planProcessor;
-
 	private final QuotationReader quotationReader;
+
+	private final SubscriptionCoverageReader subscriptionCoverageReader;
+
+	private final PlanAnalyzer planAnalyzer;
+
+	private final PlanGenerator planGenerator;
 
 	private static final int TOP_N = 3;
 
@@ -24,14 +26,16 @@ public class PlanRecommendationService {
 		Quotation quotation = quotationReader.read(quotationKey);
 
 		// 과거 계약을 분석
-		List<Set<String>> topCoverageSets = pastContactReader.readTopCombinations(quotation.getHsCode(), TOP_N);
+		List<SubscriptionCoverageSet> coverageSets = subscriptionCoverageReader.readCoverageSet(quotation.getHsCode());
+
+		List<Set<String>> topCoverageSets = planAnalyzer.getTopFrequentCoverageSets(coverageSets, TOP_N);
 
 		if (topCoverageSets.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		// 조합 목록을 받아, 마스터 조회 -> 계산 -> 플랜 조립 로직을 위임
-		return planProcessor.assemblePlans(topCoverageSets, quotation);
+		return planGenerator.generatePlan(topCoverageSets, quotation);
 	}
 
 }
