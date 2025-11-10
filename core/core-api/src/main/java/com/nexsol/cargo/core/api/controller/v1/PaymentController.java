@@ -1,6 +1,8 @@
 package com.nexsol.cargo.core.api.controller.v1;
 
+import com.nexsol.cargo.core.api.controller.v1.request.CreateKeyInPaymentRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.CreatePaymentRequest;
+import com.nexsol.cargo.core.api.controller.v1.request.PaymentRequest;
 import com.nexsol.cargo.core.api.controller.v1.response.CreatePaymentResponse;
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
 import com.nexsol.cargo.core.domain.PaymentReadyResult;
@@ -8,12 +10,7 @@ import com.nexsol.cargo.core.domain.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.math.BigDecimal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,15 +26,17 @@ public class PaymentController {
 		return ApiResponse.success(CreatePaymentResponse.fromDomain(result));
 	}
 
+	@PostMapping("/v1/payments/key-in")
+	public ApiResponse<Object> createKeyInPayment(@AuthenticationPrincipal Long userId,
+			@Valid @RequestBody CreateKeyInPaymentRequest request) {
+		paymentService.createKeyInPayment(request.toKeyInPayment(userId));
+		return ApiResponse.success();
+	}
+
 	@PostMapping("/v1/payments/callback/success")
-	public ApiResponse<Object> callbackSuccess(
-			// (PG사가 전달하는 파라미터들)
-			@RequestParam("TID") String tid, @RequestParam("AuthToken") String authToken,
-			@RequestParam("Amt") BigDecimal amount, @RequestParam("MID") String mid
-	// ... (기타 주문/인증 정보)
-	) {
-		// 1. [Presentation] 'Business Layer'에 작업 위임
-		paymentService.approvePayment(tid, authToken, amount, mid);
+	public ApiResponse<Object> callbackSuccess(@ModelAttribute PaymentRequest request) {
+
+		paymentService.approvePayment(request.toCreatePayment());
 
 		return ApiResponse.success();
 	}

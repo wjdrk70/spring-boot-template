@@ -1,6 +1,7 @@
 package com.nexsol.cargo.storage.db.core.entity;
 
 import com.nexsol.cargo.core.domain.Payment;
+import com.nexsol.cargo.core.enums.PaymentMethod;
 import com.nexsol.cargo.core.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,9 +32,9 @@ public class PaymentEntity {
 	@Column(name = "payment_status", nullable = false)
 	private PaymentStatus paymentStatus;
 
-	// ... (paymentMethod, cardType, externalPaymentKey 등) ...
+	@Enumerated(EnumType.STRING)
 	@Column(name = "payment_method")
-	private String paymentMethod;
+	private PaymentMethod paymentMethod;
 
 	@Column(name = "card_type")
 	private String cardType;

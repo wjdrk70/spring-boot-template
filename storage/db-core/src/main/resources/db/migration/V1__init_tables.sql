@@ -1,5 +1,3 @@
-
-
 -- --- 1. User (회원) ---
 -- '회원' 개념의 핵심 테이블 (인증 정보)
 CREATE TABLE app_user
@@ -54,7 +52,7 @@ CREATE TABLE quotation
 (
     id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id              BIGINT         NOT NULL COMMENT 'OCR 요청 회원 (app_user.id)',
-    quotation_key        VARCHAR(50)  NOT NULL UNIQUE COMMENT '클라이언트 전달용 Key (UUID)',
+    quotation_key        VARCHAR(50)    NOT NULL UNIQUE COMMENT '클라이언트 전달용 Key (UUID)',
 
     -- OCR 및 플랜 분석 핵심 정보 (ocr.png 참조)
     hs_code              VARCHAR(50)    NOT NULL COMMENT 'HS Code',
@@ -63,18 +61,18 @@ CREATE TABLE quotation
     exchange_rate_amount DECIMAL(15, 4) NOT NULL COMMENT '적용 환율',
 
     -- 운송 상세 정보 (ocr.png 참조)
-    ref_no               VARCHAR(50)  NOT NULL COMMENT 'Ref No',
-    bl_no                VARCHAR(50)  NOT NULL COMMENT 'B/L No',
-    outbound_date        DATE         NOT NULL COMMENT '출발일자',
-    origin               VARCHAR(255) NOT NULL COMMENT '출발지',
-    destination          VARCHAR(255) NOT NULL COMMENT '도착지',
+    ref_no               VARCHAR(50)    NOT NULL COMMENT 'Ref No',
+    bl_no                VARCHAR(50)    NOT NULL COMMENT 'B/L No',
+    outbound_date        DATE           NOT NULL COMMENT '출발일자',
+    origin               VARCHAR(255)   NOT NULL COMMENT '출발지',
+    destination          VARCHAR(255)   NOT NULL COMMENT '도착지',
     conveyance           ENUM('AIR','SHIP')  NOT NULL COMMENT '운송용구',
-    packing_type         VARCHAR(50)  NOT NULL COMMENT '포장 구분',
-    cargo_item_name      VARCHAR(255) NOT NULL COMMENT '품목 상세',
+    packing_type         VARCHAR(50)    NOT NULL COMMENT '포장 구분',
+    cargo_item_name      VARCHAR(255)   NOT NULL COMMENT '품목 상세',
 
     status               ENUM('PENDING', 'SUBSCRIBED') NOT NULL DEFAULT 'PENDING' COMMENT '상태 (청약 완료 여부)',
-    created_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_quotation_user FOREIGN KEY (user_id) REFERENCES `app_user` (id)
 ) COMMENT '가견적 (OCR 임시 저장)';
@@ -85,20 +83,20 @@ CREATE TABLE quotation
 CREATE TABLE coverage_base
 (
     id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50)  NOT NULL UNIQUE COMMENT '담보특약 코드 (e.g., 101662)',
-    name VARCHAR(255) NOT NULL COMMENT '담보특약 명칭 (e.g., ICC(A))',
-    rate DECIMAL(10,5) NOT NULL COMMENT '기본 요율(e.g., 0,015)'
+    code VARCHAR(50)    NOT NULL UNIQUE COMMENT '담보특약 코드 (e.g., 101662)',
+    name VARCHAR(255)   NOT NULL COMMENT '담보특약 명칭 (e.g., ICC(A))',
+    rate DECIMAL(10, 5) NOT NULL COMMENT '기본 요율(e.g., 0,015)'
 ) COMMENT '기본 담보 마스터';
 
 -- '담보' 개념의 옵션 담보 (e.g., WAR CLAUSES)
 CREATE TABLE coverage_option
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code        VARCHAR(50)  NOT NULL UNIQUE COMMENT '하위 조건 코드 (e.g., 102077)',
-    name        VARCHAR(255) NOT NULL COMMENT '하위 조건 명칭 (e.g., WAR CLAUSES)',
+    code        VARCHAR(50)    NOT NULL UNIQUE COMMENT '하위 조건 코드 (e.g., 102077)',
+    name        VARCHAR(255)   NOT NULL COMMENT '하위 조건 명칭 (e.g., WAR CLAUSES)',
     option_type ENUM('REFERENCE', 'ADDITIONAL', 'EXTENSION') NOT NULL COMMENT '옵션 타입 (참조, 추가, 확장)',
-    rate DECIMAL(10,5) NOT NULL DEFAULT 0.0 COMMENT '부가/확장 요율 (e.g., 0.001)',
-    rate_type ENUM('ADDITIONAL_RISK', 'EXTENSION', 'TOTAL_LOSS', 'SPECIAL_CLAUSE', 'SURCHARGE') NOT NULL COMMENT '요율의 타입 (부가위험,확장담보,전체 loss,전쟁/파업,추가할증)'
+    rate        DECIMAL(10, 5) NOT NULL DEFAULT 0.0 COMMENT '부가/확장 요율 (e.g., 0.001)',
+    rate_type   ENUM('ADDITIONAL_RISK', 'EXTENSION', 'TOTAL_LOSS', 'SPECIAL_CLAUSE', 'SURCHARGE') NOT NULL COMMENT '요율의 타입 (부가위험,확장담보,전체 loss,전쟁/파업,추가할증)'
 ) COMMENT '옵션 담보 마스터';
 
 
@@ -107,18 +105,18 @@ CREATE TABLE coverage_option
 CREATE TABLE subscription
 (
     id                        BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id                   BIGINT       NOT NULL COMMENT '청약 생성 회원 (app_user.id)',
+    user_id                   BIGINT         NOT NULL COMMENT '청약 생성 회원 (app_user.id)',
     status                    ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETE', 'POLICY_ISSUED', 'CANCELLED') NOT NULL COMMENT '청약 상태',
     insurance_premium         DECIMAL(15, 2) NOT NULL COMMENT '확정 보험료 (원화)',
     -- 계약자/피보험자 정보
-    is_same                   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '피보험자가 계약자와 동일한지 여부',
-    policyholder_company_name VARCHAR(255) NOT NULL COMMENT '계약자 상호명 ',
-    policyholder_company_code VARCHAR(50)  NOT NULL COMMENT '계약자 사업자번호',
+    is_same                   BOOLEAN        NOT NULL DEFAULT FALSE COMMENT '피보험자가 계약자와 동일한지 여부',
+    policyholder_company_name VARCHAR(255)   NOT NULL COMMENT '계약자 상호명 ',
+    policyholder_company_code VARCHAR(50)    NOT NULL COMMENT '계약자 사업자번호',
     insured_company_name      VARCHAR(255) NULL COMMENT '피보험자 상호명',
     insured_company_code      VARCHAR(50) NULL COMMENT '피보험자 사업자번호',
 
-    created_at                DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at                DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_subscription_user FOREIGN KEY (user_id) REFERENCES `app_user` (id)
 ) COMMENT '청약서 (핵심)';
@@ -177,7 +175,7 @@ CREATE TABLE payment
     payment_status       ENUM('READY', 'SUCCESS') NOT NULL COMMENT '결제 상태',
 
     -- 결제 방식 (TODO: 외부 Payment API 추후 연동)
-    payment_method       VARCHAR(50) NULL COMMENT '결제 수단 (CARD, PAY, BANK)',
+    payment_method       ENUM('CARD_KEY_IN','SIMPLE_PAY','BANK_TRANSFER') NULL COMMENT '결제 수단 (CARD, PAY, BANK)',
     card_type            VARCHAR(50) NULL COMMENT '카드 종류 (선택)',
     card_number_masked   VARCHAR(50) NULL COMMENT '마스킹된 카드 번호',
     expiry_date          VARCHAR(10) NULL COMMENT '유효기간 (MM/YYYY)',

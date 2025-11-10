@@ -4,24 +4,26 @@ import com.nexsol.cargo.core.domain.PaymentReadyResult;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
-
 @Getter
 @Builder
 public class CreatePaymentResponse {
 
-	private String tid;
+	private String moid;
 
-	private BigDecimal amount;
+	private String mid;
+
+	private String amt;
+
+	private String ediDate;
 
 	private String signData;
 
-	// private String mid; (공통 값이면 클라이언트가 알 수도 있음)
-
 	public static CreatePaymentResponse fromDomain(PaymentReadyResult result) {
 		return CreatePaymentResponse.builder()
-			.tid(result.tid())
-			.amount(result.amount())
+			.moid(result.moid())
+			.mid(result.mid())
+			.amt(result.amt())
+			.ediDate(result.ediDate())
 			.signData(result.signData())
 			.build();
 	}

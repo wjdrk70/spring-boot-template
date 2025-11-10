@@ -1,5 +1,6 @@
 package com.nexsol.cargo.core.domain;
 
+import com.nexsol.cargo.core.enums.PaymentMethod;
 import com.nexsol.cargo.core.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +23,7 @@ public class Payment {
 
 	private PaymentStatus paymentStatus;
 
-	// PG 연동 상세
-	private String paymentMethod;
+	private PaymentMethod paymentMethod;
 
 	private String cardType;
 
@@ -33,12 +33,13 @@ public class Payment {
 
 	private String externalPaymentKey; // PG사의 거래 ID (TID) 또는 승인 번호 (AuthCode)
 
-	public static Payment createReady(Long subscriptionId, BigDecimal insurancePremium) {
+	public static Payment createReady(Long subscriptionId, BigDecimal insurancePremium, PaymentMethod paymentMethod) {
 		return Payment.builder()
 			.id(null)
 			.subscriptionId(subscriptionId)
 			.insurancePremium(insurancePremium)
 			.paymentStatus(PaymentStatus.READY)
+			.paymentMethod(paymentMethod)
 			.build();
 	}
 

@@ -42,7 +42,7 @@ spring.config.activate.on-profile: local-dev
 spring:
   docker:
     compose:
-      enabled: false
+      enabled: true
 storage:
   datasource:
     core:
