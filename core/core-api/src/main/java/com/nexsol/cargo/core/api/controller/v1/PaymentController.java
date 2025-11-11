@@ -1,5 +1,6 @@
 package com.nexsol.cargo.core.api.controller.v1;
 
+import com.nexsol.cargo.core.api.controller.v1.request.CancelPaymentRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.CreateKeyInPaymentRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.CreatePaymentRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.PaymentRequest;
@@ -24,6 +25,13 @@ public class PaymentController {
 		PaymentReadyResult result = paymentService.createPayment(userId, request.getSubscriptionId());
 
 		return ApiResponse.success(CreatePaymentResponse.fromDomain(result));
+	}
+
+	@PostMapping("/v1/payments/{paymentId}/cancel")
+	public ApiResponse<Object> cancelPayment(@AuthenticationPrincipal Long userId, @PathVariable Long paymentId,
+			@Valid @RequestBody CancelPaymentRequest request) {
+		paymentService.cancelPayment(paymentId, userId, request.getReason());
+		return ApiResponse.success();
 	}
 
 	@PostMapping("/v1/payments/key-in")

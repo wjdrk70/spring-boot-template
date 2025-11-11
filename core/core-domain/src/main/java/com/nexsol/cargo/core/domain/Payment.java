@@ -17,6 +17,8 @@ public class Payment {
 
 	private Long id;
 
+	private String authCode;
+
 	private Long subscriptionId;
 
 	private BigDecimal insurancePremium;
@@ -43,17 +45,23 @@ public class Payment {
 			.build();
 	}
 
-	public void success(String authCode, String cardCode) {
-		// (방어 로직: READY 상태일 때만 SUCCESS로 변경 가능)
+	public void success(String tid,String authCode, String cardCode) {
 		if (this.paymentStatus != PaymentStatus.READY) {
-			// TODO: 이미 처리된 결제는 로그만 남김 (멱등성) 추후 수정
 			return;
 		}
-
 		this.paymentStatus = PaymentStatus.SUCCESS;
-		this.externalPaymentKey = authCode; // PG 승인 번호
-		this.cardType = cardCode; // PG에서 받은 카드 코드 (e.g., "01")
+		this.externalPaymentKey = tid;
+		this.authCode = authCode;
+		this.cardType = cardCode;
 
+	}
+
+	public void cancel() {
+		if (this.paymentStatus != PaymentStatus.SUCCESS) {
+			// TODO: 이미 취소되었거나 성공한 결제가 아닐 경우 예외 처리
+			return;
+		}
+		this.paymentStatus = PaymentStatus.CANCEL;
 	}
 
 }

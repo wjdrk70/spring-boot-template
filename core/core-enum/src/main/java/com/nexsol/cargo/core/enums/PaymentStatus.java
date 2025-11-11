@@ -2,6 +2,6 @@ package com.nexsol.cargo.core.enums;
 
 public enum PaymentStatus {
 
-	READY, SUCCESS
+	READY, SUCCESS, CANCEL
 
 }

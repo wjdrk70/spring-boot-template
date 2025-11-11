@@ -1,10 +1,6 @@
 package com.nexsol.cargo.core.support;
 
-import com.nexsol.cargo.core.domain.PaymentCompleteEvent;
-import com.nexsol.cargo.core.domain.Subscription;
-import com.nexsol.cargo.core.domain.SubscriptionRepository;
-import com.nexsol.cargo.core.error.CoreErrorType;
-import com.nexsol.cargo.core.error.CoreException;
+import com.nexsol.cargo.core.domain.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,6 +16,8 @@ public class PaymentEventHandler {
 
 	private final SubscriptionRepository subscriptionRepository;
 
+	private final SubscriptionReader subscriptionReader;
+
 	@EventListener
 	@Transactional
 	public void handlePaymentCompleted(PaymentCompleteEvent event) {
@@ -29,18 +27,36 @@ public class PaymentEventHandler {
 		}
 
 		try {
-			Subscription subscription = subscriptionRepository.findById(event.subscriptionId())
-				.orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA)); // TODO:
-																						// 추후
-																						// subscription
-																						// 에러타입
-																						// 추가
+			Subscription subscription = subscriptionReader.read(event.subscriptionId());
 
 			subscription.completePayment();
 			subscriptionRepository.save(subscription);
 		}
 		catch (Exception e) {
 			log.error("[Event] PaymentCompletedEvent 처리 중 오류 발생. Subscription ID: {}. Error: {}",
+					event.subscriptionId(), e.getMessage(), e);
+		}
+	}
+
+	@EventListener
+	@Transactional
+	public void handlePaymentCancelled(PaymentCancelEvent event) {
+		if (event == null || event.subscriptionId() == null) {
+			log.warn("[Event] PaymentCancelledEvent 수신 실패. 이벤트 또는 SubscriptionId가 null입니다.");
+			return;
+		}
+
+		try {
+			// 소유권 검증이 필요 없는 내부 시스템용 read 호출
+			Subscription subscription = subscriptionReader.read(event.subscriptionId());
+
+			subscription.cancelPayment();
+			subscriptionRepository.save(subscription);
+
+			log.info("[Event] Subscription {} 상태 CANCELLED로 변경 완료", event.subscriptionId());
+		}
+		catch (Exception e) {
+			log.error("[Event] PaymentCancelledEvent 처리 중 오류 발생. Subscription ID: {}. Error: {}",
 					event.subscriptionId(), e.getMessage(), e);
 		}
 	}

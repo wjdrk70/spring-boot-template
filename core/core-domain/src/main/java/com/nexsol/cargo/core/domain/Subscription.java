@@ -46,4 +46,11 @@ public class Subscription {
 		this.status = SubscriptionStatus.PAYMENT_COMPLETE;
 	}
 
+	public void cancelPayment() {
+		if (this.status != SubscriptionStatus.PAYMENT_COMPLETE) {
+			return;
+		}
+		this.status = SubscriptionStatus.CANCEL;
+	}
+
 }

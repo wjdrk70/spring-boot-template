@@ -48,6 +48,9 @@ public class PaymentEntity {
 	@Column(name = "external_payment_key")
 	private String externalPaymentKey;
 
+	@Column(name = "auth_code")
+	private String authCode;
+
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -66,6 +69,7 @@ public class PaymentEntity {
 		entity.cardType = domain.getCardType();
 		entity.cardNumberMasked = domain.getCardNumberMasked();
 		entity.expiryDate = domain.getExpiryDate();
+		entity.authCode = domain.getAuthCode();
 		entity.externalPaymentKey = domain.getExternalPaymentKey();
 		return entity;
 	}
@@ -81,6 +85,7 @@ public class PaymentEntity {
 			.cardNumberMasked(this.cardNumberMasked)
 			.expiryDate(this.expiryDate)
 			.externalPaymentKey(this.externalPaymentKey)
+			.authCode(this.authCode)
 			.build();
 	}
 

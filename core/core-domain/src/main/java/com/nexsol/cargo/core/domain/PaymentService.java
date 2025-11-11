@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
 import com.nexsol.cargo.core.enums.PaymentMethod;
+import com.nexsol.cargo.core.enums.PaymentStatus;
 import com.nexsol.cargo.core.error.CoreErrorType;
 import com.nexsol.cargo.core.error.CoreException;
 import com.nexsol.cargo.core.support.CardEncryptor;
@@ -61,9 +62,9 @@ public class PaymentService {
 		Payment savedPayment = paymentAppender.appendReady(subscriptionId, premium, PaymentMethod.SIMPLE_PAY);
 
 		String moid = String.valueOf(savedPayment.getId());
-		String amt = premium.toPlainString();
+		String amt = premium.setScale(0, RoundingMode.DOWN).toPlainString();
 		String ediDat = LocalDateTime.now().format(EDI_DATE_FORMATTER);
-		String plainText = this.mid + moid + amt + ediDat + this.merchantKey;
+		String plainText = ediDat + this.mid + amt + this.merchantKey;
 		String signData = sha256Util.sha(plainText);
 
 		return new PaymentReadyResult(moid, this.mid, amt, ediDat, signData);
@@ -101,7 +102,7 @@ public class PaymentService {
 			PgApprovalResult pgResult = paymentGatewayClient.keyInPayment(tid, moid, amt, encData, signData, ediDate,
 					goodsName);
 
-			payment.success(pgResult.authCode(), pgResult.cardCode());
+			payment.success(tid, pgResult.authCode(), pgResult.cardCode());
 			paymentRepository.save(payment);
 
 			eventPublisher.publishEvent(new PaymentCompleteEvent(payment.getSubscriptionId()));
@@ -140,18 +141,56 @@ public class PaymentService {
 		try {
 			PgApprovalResult pgResult = paymentGatewayClient.approve(createPayment.getTxTid(),
 					createPayment.getAuthToken(), requestedAmount, this.mid, createPayment.getNextAppURL());
-			payment.success(pgResult.authCode(), pgResult.cardCode());
+			payment.success(createPayment.getTxTid(), pgResult.authCode(), pgResult.cardCode());
 			paymentRepository.save(payment);
 
-			Subscription subscription = subscriptionReader.read(payment.getSubscriptionId(), null);
-			subscription.completePayment();
-			subscriptionRepository.save(subscription);
+			eventPublisher.publishEvent(new PaymentCompleteEvent(payment.getSubscriptionId()));
 		}
 		catch (Exception e) {
 			paymentGatewayClient.netCancel(createPayment.getTxTid(), createPayment.getAuthToken(), requestedAmount,
 					createPayment.getMid(), createPayment.getNetCancelURL());
 
 			throw e; // Controller로 예외 전파
+		}
+	}
+
+	@Transactional
+	public void cancelPayment(Long paymentId, Long userId, String reason) {
+		log.info("결제 취소 시도. Payment ID: {}, User ID: {}", paymentId, userId);
+
+		Payment payment = paymentRepository.findById(paymentId)
+			.orElseThrow(() -> new CoreException(CoreErrorType.PAYMENT_NOT_FOUND));
+
+		Subscription subscription = subscriptionReader.read(payment.getSubscriptionId(), userId);
+
+		if (payment.getPaymentStatus() != PaymentStatus.SUCCESS) {
+			log.warn("이미 취소되었거나 성공한 결제가 아님. Payment ID: {}", paymentId);
+			// TODO: 이미 취소된 경우 예외 처리
+			return;
+		}
+
+		String tid = payment.getExternalPaymentKey();
+		String moid = String.valueOf(payment.getId());
+		String cancelAmt = payment.getInsurancePremium().setScale(0, RoundingMode.DOWN).toPlainString();
+		String ediDate = LocalDateTime.now().format(EDI_DATE_FORMATTER);
+
+		String signDataPlain = this.mid + cancelAmt + ediDate + this.merchantKey;
+		String signData = sha256Util.sha(signDataPlain);
+
+		try {
+
+			paymentGatewayClient.cancel(tid, this.mid, moid, cancelAmt, reason, ediDate, signData);
+
+			payment.cancel();
+			paymentRepository.save(payment);
+
+			eventPublisher.publishEvent(new PaymentCancelEvent(payment.getSubscriptionId()));
+
+		}
+		catch (Exception e) {
+			log.error("PG 결제 취소 실패. Payment ID: {}. Error: {}", paymentId, e.getMessage(), e);
+			// TODO: PG 취소는 실패했으나 DB 롤백이 필요한 경우 RuntimeException으로 전환
+			throw new RuntimeException("PG 결제 취소에 실패했습니다.", e);
 		}
 	}
 

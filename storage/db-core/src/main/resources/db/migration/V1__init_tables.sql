@@ -106,7 +106,7 @@ CREATE TABLE subscription
 (
     id                        BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id                   BIGINT         NOT NULL COMMENT '청약 생성 회원 (app_user.id)',
-    status                    ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETE', 'POLICY_ISSUED', 'CANCELLED') NOT NULL COMMENT '청약 상태',
+    status                    ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETE', 'POLICY_ISSUED', 'CANCLE') NOT NULL COMMENT '청약 상태', -- [수정] CANCELLED -> CANCLE
     insurance_premium         DECIMAL(15, 2) NOT NULL COMMENT '확정 보험료 (원화)',
     -- 계약자/피보험자 정보
     is_same                   BOOLEAN        NOT NULL DEFAULT FALSE COMMENT '피보험자가 계약자와 동일한지 여부',
@@ -172,14 +172,15 @@ CREATE TABLE payment
     subscription_id      BIGINT         NOT NULL,
 
     insurance_premium    DECIMAL(15, 2) NOT NULL COMMENT '확정 보험료 (결제 대상 금액)',
-    payment_status       ENUM('READY', 'SUCCESS') NOT NULL COMMENT '결제 상태',
+    payment_status       ENUM('READY', 'SUCCESS', 'CANCLE') NOT NULL COMMENT '결제 상태',
 
-    -- 결제 방식 (TODO: 외부 Payment API 추후 연동)
+
     payment_method       ENUM('CARD_KEY_IN','SIMPLE_PAY','BANK_TRANSFER') NULL COMMENT '결제 수단 (CARD, PAY, BANK)',
     card_type            VARCHAR(50) NULL COMMENT '카드 종류 (선택)',
     card_number_masked   VARCHAR(50) NULL COMMENT '마스킹된 카드 번호',
     expiry_date          VARCHAR(10) NULL COMMENT '유효기간 (MM/YYYY)',
-    external_payment_key VARCHAR(255) NULL COMMENT '외부 결제사 고유키',
+    external_payment_key VARCHAR(255) NULL COMMENT '외부 결제사 고유키 (TID)',
+    auth_code            VARCHAR(50) NULL COMMENT 'PG사 승인 번호',
 
     created_at           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

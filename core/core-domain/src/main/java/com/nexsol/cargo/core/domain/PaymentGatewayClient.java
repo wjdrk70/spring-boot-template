@@ -12,4 +12,7 @@ public interface PaymentGatewayClient {
 	PgApprovalResult keyInPayment(String tid, String moid, String amt, String encData, String signData, String ediDate,
 			String goodsName);
 
+	PgCancelResult cancel(String tid, String mid, String moid, String cancelAmt, String reason, String ediDate,
+			String signData);
+
 }

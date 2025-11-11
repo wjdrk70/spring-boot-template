@@ -13,7 +13,7 @@ public class SubscriptionReader {
 	private final SubscriptionRepository subscriptionRepository;
 
 	public Subscription read(Long subscriptionId, Long userId) {
-		// (구현 예시)
+
 		Subscription subscription = subscriptionRepository.findById(subscriptionId)
 			.orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA));
 
@@ -27,6 +27,15 @@ public class SubscriptionReader {
 		}
 
 		return subscription;
+	}
+
+	public Subscription read(Long subscriptionId) {
+		return findById(subscriptionId);
+	}
+
+	private Subscription findById(Long subscriptionId) {
+		return subscriptionRepository.findById(subscriptionId)
+			.orElseThrow(() -> new CoreException(CoreErrorType.NOT_FOUND_DATA));
 	}
 
 }
