@@ -45,7 +45,7 @@ public class Payment {
 			.build();
 	}
 
-	public void success(String tid,String authCode, String cardCode) {
+	public void success(String tid, String authCode, String cardCode) {
 		if (this.paymentStatus != PaymentStatus.READY) {
 			return;
 		}

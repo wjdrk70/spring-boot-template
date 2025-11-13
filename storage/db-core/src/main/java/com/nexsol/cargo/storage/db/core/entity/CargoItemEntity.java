@@ -5,20 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "cargo_item")
+@Table(name = "cargo_item", indexes = { @Index(name = "idx_middle_code", columnList = "middle_code") })
 @Getter
 @NoArgsConstructor
-public class CargoItemEntity extends BaseEntity {
+public class CargoItemEntity {
 
-	@Column(name = "name", nullable = false, unique = true) // V1_init_tables의 'code' 대신
-															// 'name'을 사용 (사용자 요청 반영)
-	private String name;
-
-	@Column(name = "hs_code", nullable = false, unique = true)
+	@Id
+	@Column(name = "hs_code", length = 20, nullable = false)
 	private String hsCode;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "rider_id", nullable = false)
-	private CoverageBaseEntity rider;
+	@Column(name = "middle_code", length = 20, nullable = false)
+	private String middleCode;
+
+	@Column(name = "name", length = 255)
+	private String name;
 
 }

@@ -46,6 +46,16 @@ CREATE TABLE user_refresh_token
 ) COMMENT '사용자 리프레시 토큰';
 
 
+
+CREATE TABLE cargo_item
+(
+    hs_code     VARCHAR(20) NOT NULL PRIMARY KEY COMMENT 'HS 코드 (e.g., 0101)',
+    middle_code VARCHAR(20) NOT NULL COMMENT '품목중분류코드 (e.g., 21202)',
+    name        VARCHAR(255) NULL COMMENT 'HS 코드명 (e.g., 소)',
+    INDEX       idx_middle_code (middle_code)
+) COMMENT 'HS코드-품목 매핑';
+
+
 -- --- Quotation (가견적) ---
 -- OCR 분석 후 '플랜 추천' 단계로 넘어가기 전, 임시 저장되는 화물 데이터 (Key 역할)
 CREATE TABLE quotation
@@ -83,9 +93,8 @@ CREATE TABLE quotation
 CREATE TABLE coverage_base
 (
     id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50)    NOT NULL UNIQUE COMMENT '담보특약 코드 (e.g., 101662)',
-    name VARCHAR(255)   NOT NULL COMMENT '담보특약 명칭 (e.g., ICC(A))',
-    rate DECIMAL(10, 5) NOT NULL COMMENT '기본 요율(e.g., 0,015)'
+    code VARCHAR(50)  NOT NULL UNIQUE COMMENT '담보특약 코드 (e.g., 101662)',
+    name VARCHAR(255) NOT NULL COMMENT '담보특약 명칭 (e.g., ICC(A))'
 ) COMMENT '기본 담보 마스터';
 
 -- '담보' 개념의 옵션 담보 (e.g., WAR CLAUSES)
@@ -100,13 +109,88 @@ CREATE TABLE coverage_option
 ) COMMENT '옵션 담보 마스터';
 
 
+CREATE TABLE voyage
+(
+    voyage_code VARCHAR(10)  NOT NULL PRIMARY KEY COMMENT '항해구간 코드 (e.g., 01)',
+    name        VARCHAR(100) NOT NULL COMMENT '항해구간 명 (e.g., 보세외항)'
+) COMMENT '항해구간';
+
+CREATE TABLE base_rate
+(
+    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+    middle_code   VARCHAR(20)    NOT NULL COMMENT '품목중분류코드 (e.g., 20101)',
+    base_coverage_code VARCHAR(50)    NOT NULL COMMENT '기본조건코드 (e.g., 101664)',
+    voyage_code        VARCHAR(10)    NOT NULL COMMENT '항해구간 코드 (e.g., 01)',
+    rate               DECIMAL(10, 5) NOT NULL COMMENT '기본 요율',
+
+    -- 빠른 조회를 위한 복합 인덱스
+    UNIQUE KEY uq_base_rate (middle_code, base_coverage_code, voyage_code)
+) COMMENT '기본 요율 (품목+담보+항해구간)';
+
+CREATE TABLE extension_rate
+(
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    risk_name      VARCHAR(100)   NOT NULL COMMENT '확장위험명 (e.g., ISE)',
+    risk_condition VARCHAR(100)   NOT NULL COMMENT '확장위험 조건 (e.g., Total Loss)',
+    period_days    INT            NOT NULL COMMENT '기간 (e.g., 30)',
+    rate           DECIMAL(10, 5) NOT NULL COMMENT '확장 위험 요율',
+    -- (향후 90일 초과 10일 단위 가산 로직은 별도 구현)
+    UNIQUE KEY uq_extension_rate (risk_name, risk_condition, period_days)
+) COMMENT '확장담보 요율';
+
+CREATE TABLE tlo_rate
+(
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vessel_type  VARCHAR(50)    NOT NULL COMMENT '선박 (e.g., 철 선)',
+    bl_exists    BOOLEAN        NOT NULL COMMENT 'B/L 유무 (e.g., 0:무, 1:유)',
+    region       VARCHAR(100)   NOT NULL COMMENT '지 역 (e.g., Coastal Area)',
+    rate_percent DECIMAL(10, 5) NOT NULL COMMENT '적용 요율 (e.g., 0.70)',
+    UNIQUE KEY uq_tlo_rate (vessel_type, bl_exists, region)
+) COMMENT '전손(TLO) 요율';
+
+CREATE TABLE special_risk_rate
+(
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    risk_type      VARCHAR(100)   NOT NULL COMMENT '구 분 (e.g., 관세담보 화물)',
+    clause_name    VARCHAR(100)   NOT NULL COMMENT '첨부약관 (e.g., Custom Duty Clause)',
+    condition_name VARCHAR(100) NULL COMMENT '조건 (e.g., 90일)',
+    rate           DECIMAL(10, 5) NOT NULL COMMENT '가산 요율',
+    rate_type      ENUM('PERCENTAGE', 'FIXED') NOT NULL COMMENT '요율 타입 (정률, 정액)',
+    UNIQUE KEY uq_special_risk_rate (risk_type, clause_name, condition_name)
+) COMMENT '특별위험 요율';
+
+
+CREATE TABLE surcharge_rate
+(
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    surcharge_type VARCHAR(100)   NOT NULL COMMENT '구 분 (e.g., 선박할증)',
+    condition_name VARCHAR(100)   NOT NULL COMMENT '적용요건 (e.g., Institute Classification Clause 첨부)',
+    rate           DECIMAL(10, 5) NOT NULL COMMENT '적용 요율',
+    rate_type      ENUM('REFERENCE', 'FIXED') NOT NULL COMMENT '요율 타입 (별표참조, 고정값)',
+    UNIQUE KEY uq_surcharge_rate (surcharge_type, condition_name)
+) COMMENT '추가할증 요율';
+
+
+CREATE TABLE special_policy_rate
+(
+    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+    middle_code   VARCHAR(20)    NOT NULL COMMENT '품목코드(1)',
+    item_detail_code   VARCHAR(20) NULL COMMENT '품목코드',
+    base_coverage_code VARCHAR(50)    NOT NULL COMMENT '기본조건코드',
+    voyage_code        VARCHAR(10) NULL COMMENT 'Voyage',
+    packing_code       VARCHAR(10) NULL COMMENT '포장',
+    -- (기타 부가위험, 확장담보 등 모든 조건 컬럼이 필요함) ...
+    rate               DECIMAL(10, 5) NOT NULL COMMENT '적용특칙요율'
+    -- (모든 조건을 조합한 UNIQUE KEY 필요)
+) COMMENT '적용특칙 요율';
+
 -- --- 3. Subscription (청약) ---
 -- '청약' 개념의 핵심 (진행 상태 및 계약자 정보)
 CREATE TABLE subscription
 (
     id                        BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id                   BIGINT         NOT NULL COMMENT '청약 생성 회원 (app_user.id)',
-    status                    ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETE', 'POLICY_ISSUED', 'CANCLE') NOT NULL COMMENT '청약 상태', -- [수정] CANCELLED -> CANCLE
+    status                    ENUM('PAYMENT_PENDING', 'PAYMENT_COMPLETE', 'POLICY_ISSUED', 'CANCEL') NOT NULL COMMENT '청약 상태',
     insurance_premium         DECIMAL(15, 2) NOT NULL COMMENT '확정 보험료 (원화)',
     -- 계약자/피보험자 정보
     is_same                   BOOLEAN        NOT NULL DEFAULT FALSE COMMENT '피보험자가 계약자와 동일한지 여부',
@@ -114,10 +198,11 @@ CREATE TABLE subscription
     policyholder_company_code VARCHAR(50)    NOT NULL COMMENT '계약자 사업자번호',
     insured_company_name      VARCHAR(255) NULL COMMENT '피보험자 상호명',
     insured_company_code      VARCHAR(50) NULL COMMENT '피보험자 사업자번호',
+    policy_number             VARCHAR(100) NULL COMMENT '보험증권번호 (발급 시 채번)',
 
     created_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
+    INDEX                     idx_policy_number (policy_number),
     CONSTRAINT fk_subscription_user FOREIGN KEY (user_id) REFERENCES `app_user` (id)
 ) COMMENT '청약서 (핵심)';
 
@@ -172,7 +257,7 @@ CREATE TABLE payment
     subscription_id      BIGINT         NOT NULL,
 
     insurance_premium    DECIMAL(15, 2) NOT NULL COMMENT '확정 보험료 (결제 대상 금액)',
-    payment_status       ENUM('READY', 'SUCCESS', 'CANCLE') NOT NULL COMMENT '결제 상태',
+    payment_status       ENUM('READY', 'SUCCESS', 'CANCEL') NOT NULL COMMENT '결제 상태',
 
 
     payment_method       ENUM('CARD_KEY_IN','SIMPLE_PAY','BANK_TRANSFER') NULL COMMENT '결제 수단 (CARD, PAY, BANK)',

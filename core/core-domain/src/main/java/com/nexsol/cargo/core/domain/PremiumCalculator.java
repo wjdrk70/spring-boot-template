@@ -1,84 +1,52 @@
 package com.nexsol.cargo.core.domain;
 
-import com.nexsol.cargo.core.enums.ConveyanceType;
-import com.nexsol.cargo.core.enums.RateType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class PremiumCalculator {
 
-	private static final String KRW_CURRENCY = "KRW";
+	private static final BigDecimal PROFIT_MARGIN = new BigDecimal("1.10"); // 희망 인상률 110%
+																			// 고정
 
+	private final BaseRateFinder baseRateFinder;
+
+	private final CargoItemFinder cargoItemFinder;
+
+	private final VoyageFinder voyageFinder;
+
+	private final PremiumAdjust premiumAdjust;
+
+	// TODO: 계산 로직 확립 이후 주석 모두 제거
 	public BigDecimal calculate(CargoDetail cargoDetail, BigDecimal exchangeRateAmount, BaseCoverage baseCoverage,
 			List<OptionCoverage> options) {
+		// 기본요율 조회
+		String cargoItemCode = cargoItemFinder.find(cargoDetail.hsCode());
+		String voyageCode = voyageFinder.find(cargoDetail.origin());
+		BigDecimal baseRate = baseRateFinder.find(cargoItemCode, baseCoverage.getCode(), voyageCode);
 
-		// 1. 기본 요율 조회
-		BigDecimal baseRate = baseCoverage.getRate(); // e.g., 0.015
+		// TODO: 현재는 요율 0으로 임의지정 코드 데이터 들어오면 비즈니스 로직 전환
+		// 통상요율 계산 (TODO 반영)
+		BigDecimal normalRate = baseRate.add(BigDecimal.ZERO); // (부가위험 등 합산)
 
-		// 2. 부가위험요율 합
-		BigDecimal sumOfAdditionalRiskRates = options.stream()
-			.filter(option -> option.getRateType() == RateType.ADDITIONAL_RISK)
-			.map(OptionCoverage::getRate)
-			.reduce(BigDecimal.ZERO, BigDecimal::add); // e.g., 0.002 + 0.001
+		// 적용특칙요율 계산 (TODO 반영)
+		BigDecimal specialPolicyRate = BigDecimal.ZERO;
 
-		// 3. 확장담보요율
-		BigDecimal extensionRate = options.stream()
-			.filter(option -> option.getRateType() == RateType.EXTENSION)
-			.map(OptionCoverage::getRate)
-			.reduce(BigDecimal.ZERO, BigDecimal::add); // e.g., 0.0
+		// 최종요율 계산 (TODO 반영)
+		BigDecimal finalRate = normalRate.subtract(specialPolicyRate);
 
-		// 4. 특약요율 합(Σ)
-		BigDecimal sumOfSpecialClauseRates = options.stream()
-			.filter(option -> option.getRateType() == RateType.SPECIAL_CLAUSE)
-			.map(OptionCoverage::getRate)
-			.reduce(BigDecimal.ZERO, BigDecimal::add); // e.g., 0.005
-
-		// 5. 추가 전손요율
-		BigDecimal totalLossRate = calculateTotalLossRate(cargoDetail.conveyance(), cargoDetail.origin(),
-				cargoDetail.destination());
-
-		// 6. 추가할증요율 계산 (e.g., 선박할증)
-		BigDecimal surchargeRate = BigDecimal.ZERO;
-
-		// 통상 요율
-		BigDecimal totalRate = baseRate.add(sumOfAdditionalRiskRates)
-			.add(extensionRate)
-			.add(sumOfSpecialClauseRates)
-			.add(totalLossRate)
-			.add(surchargeRate);
+		// 보험가입금액 계산
+		BigDecimal insuredAmount = cargoDetail.invoiceAmount().multiply(PROFIT_MARGIN);
 
 		// 보험료 산출
-		BigDecimal premium = getPremium(cargoDetail, exchangeRateAmount, totalRate);
+		BigDecimal calculatedPremium = finalRate.multiply(insuredAmount);
 
-		return premium;
-	}
-
-	private static BigDecimal getPremium(CargoDetail cargoDetail, BigDecimal exchangeRateAmount, BigDecimal totalRate) {
-		BigDecimal calculatedPremium = cargoDetail.invoiceAmount().multiply(totalRate);
-
-		// 환율 적용
-		BigDecimal premium = calculatedPremium;
-
-		if (!cargoDetail.currencyUnit().toUpperCase().equals(KRW_CURRENCY)) {
-
-			// 보험료(원화) = 보험료(외화) x 환율 금액
-			premium = calculatedPremium.multiply(exchangeRateAmount).setScale(0, RoundingMode.HALF_UP);
-		}
-		else {
-			// KRW인 경우, 보험료는 소수점 2자리까지 유지
-			premium = premium.setScale(2, RoundingMode.HALF_UP);
-		}
-		return premium;
-	}
-
-	private BigDecimal calculateTotalLossRate(ConveyanceType conveyance, String origin, String destination) {
-		// TODO:의 로직 구현 추후 수정
-		// e.g., if (conveyance == ConveyanceType.SHIP && "철선") { return 0.001; (70% 기준) }
-		return BigDecimal.ZERO; // TODO: 임시 추후 수정
+		// 최종 보험료 조정
+		return premiumAdjust.adjust(calculatedPremium, cargoDetail.currencyUnit(), exchangeRateAmount);
 	}
 
 }

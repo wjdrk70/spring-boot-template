@@ -45,14 +45,12 @@ public class NicePaymentsClient implements PaymentGatewayClient {
 
 	private static final Charset EUC_KR = Charset.forName("EUC-KR");
 
-	private static final String CANCLE_SUCCESS_CODE = "2001";
+	private static final String CANCEL_SUCCESS_CODE = "2001";
 
 	private static final String KEY_IN_URL = "https://webapi.nicepay.co.kr/webapi/card_keyin.jsp";
 
 	private static final String CANCEL_URL = "https://pg-api.nicepay.co.kr/webapi/cancel_process.jsp"; // ⬅️
 																										// [신규]
-
-	private static final String CANCEL_SUCCESS_CODE = "2001";
 
 	@Override
 	public PgApprovalResult approve(String txTid, String authToken, BigDecimal amount, String mid, String NextAppURL) {
@@ -154,7 +152,7 @@ public class NicePaymentsClient implements PaymentGatewayClient {
 				.bodyToMono(Map.class)
 				.block();
 
-			if (responseMap != null && CANCLE_SUCCESS_CODE.equals(responseMap.get("ResultCode"))) {
+			if (responseMap != null && CANCEL_SUCCESS_CODE.equals(responseMap.get("ResultCode"))) {
 				log.info("[NicePayments] 망취소 성공. TID: {}", txTid);
 			}
 			else {

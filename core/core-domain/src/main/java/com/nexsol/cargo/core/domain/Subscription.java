@@ -21,6 +21,8 @@ public class Subscription {
 
 	private SubscriptionStatus status;
 
+	private String policyNumber;
+
 	private BigDecimal insurancePremium;
 
 	private boolean isSame;
@@ -51,6 +53,15 @@ public class Subscription {
 			return;
 		}
 		this.status = SubscriptionStatus.CANCEL;
+	}
+
+	public void issuePolicy(String policyNumber) {
+		if (this.status != SubscriptionStatus.PAYMENT_COMPLETE) {
+			// TODO: 오류처리
+			return;
+		}
+		this.policyNumber = policyNumber;
+		this.status = SubscriptionStatus.POLICY_ISSUED;
 	}
 
 }

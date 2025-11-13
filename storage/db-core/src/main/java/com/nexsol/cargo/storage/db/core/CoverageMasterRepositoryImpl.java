@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CoverageMasterRepositoryImpl implements CoverageMasterRepository {
 
-	private final CoverageRiderJpaRepository coverageRiderJpaRepository;
+	private final CoverageBaseJpaRepository coverageBaseJpaRepository;
 
 	private final CoverageOptionJpaRepository coverageOptionJpaRepository;
 
 	@Override
 	public CoverageMaster findCoveragesByCode(Set<String> code) {
-		BaseCoverage baseCoverage = coverageRiderJpaRepository.findByCodeIn(code)
+		BaseCoverage baseCoverage = coverageBaseJpaRepository.findByCodeIn(code)
 			.map(entity -> entity.toDomain())
 			.orElse(null);
 
