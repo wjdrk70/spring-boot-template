@@ -1,5 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +17,7 @@ public class BaseRateFinder {
 		try {
 
 			return baseRateRepository.findRate(middleCode, baseCoverageCode, voyageCode)
-				.orElseThrow(() -> new IllegalArgumentException("기본 요율을 찾을 수 없습니다."));
+				.orElseThrow(() -> new CoreException(CoreErrorType.BASE_RATE_NOT_FOUND));
 
 		}
 		catch (Exception e) {

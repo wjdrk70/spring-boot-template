@@ -13,7 +13,7 @@ public class CoverageMasterReader {
 
 	private final CoverageMasterRepository coverageMasterRepository;
 
-	public CoverageMaster findValidatedMaster(Set<String> codeSet) {
+	public CoverageMaster read(Set<String> codeSet) {
 
 		CoverageMaster masterSet = coverageMasterRepository.findCoveragesByCode(codeSet);
 

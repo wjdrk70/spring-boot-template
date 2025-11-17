@@ -4,6 +4,7 @@ import com.nexsol.cargo.core.domain.BaseCoverage;
 import com.nexsol.cargo.core.domain.CoverageMaster;
 import com.nexsol.cargo.core.domain.CoverageMasterRepository;
 import com.nexsol.cargo.core.domain.OptionCoverage;
+import com.nexsol.cargo.storage.db.core.entity.CoverageBaseEntity;
 import com.nexsol.cargo.storage.db.core.entity.CoverageOptionEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -22,10 +23,12 @@ public class CoverageMasterRepositoryImpl implements CoverageMasterRepository {
 
 	@Override
 	public CoverageMaster findCoveragesByCode(Set<String> code) {
-		BaseCoverage baseCoverage = coverageBaseJpaRepository.findByCodeIn(code)
-			.map(entity -> entity.toDomain())
-			.orElse(null);
+		List<BaseCoverage> baseCodes = coverageBaseJpaRepository.findByCodeIn(code)
+			.stream()
+			.map(CoverageBaseEntity::toDomain)
+			.toList();
 
+		BaseCoverage baseCoverage = baseCodes.isEmpty() ? null : baseCodes.get(0);
 		// '옵션 담보' 조회
 		List<OptionCoverage> options = coverageOptionJpaRepository.findByCodeIn(code)
 			.stream()

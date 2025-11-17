@@ -15,7 +15,7 @@ public class SubscriptionCoverageManager {
 	private final CoverageMasterReader masterReader;
 
 	public List<SubscriptionCoverage> create(Set<String> coverageCodes) {
-		CoverageMaster masterSet = masterReader.findValidatedMaster(coverageCodes);
+		CoverageMaster masterSet = masterReader.read(coverageCodes);
 
 		BaseCoverage base = masterSet.baseCoverage();
 		SubscriptionCoverage baseSnapshot = new SubscriptionCoverage(ConditionType.BASE, base.getCode(),

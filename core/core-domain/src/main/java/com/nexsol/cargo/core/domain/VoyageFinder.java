@@ -1,5 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,7 @@ public class VoyageFinder {
 
 	public String find(String origin) {
 		String voyageCode = voyageRepository.findVoyageCodeByOrigin(origin)
-			.orElseThrow(() -> new IllegalArgumentException("출발지에 해당하는 항해구간코드를 찾을 수 없습니다: " + origin));
+			.orElseThrow(() -> new CoreException(CoreErrorType.VOYAGE_NOT_FOUND));
 
 		return voyageCode;
 	}

@@ -25,7 +25,7 @@ public class SubscriptionService {
 	public SubscriptionResult create(CreateSubscription creation) {
 		Quotation quotation = quotationReader.read(creation.quotationKey());
 
-		CoverageMaster masterSet = coverageMasterReader.findValidatedMaster(creation.coverageCodes());
+		CoverageMaster masterSet = coverageMasterReader.read(creation.coverageCodes());
 
 		List<SubscriptionCoverage> coveragesToSave = subscriptionCoverageManager.create(creation.coverageCodes());
 

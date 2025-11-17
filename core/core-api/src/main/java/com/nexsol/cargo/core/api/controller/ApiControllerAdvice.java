@@ -1,10 +1,13 @@
 package com.nexsol.cargo.core.api.controller;
 
-import com.nexsol.cargo.core.api.support.error.CoreApiErrorType;
-import com.nexsol.cargo.core.api.support.error.CoreApiException;
+
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
+import com.nexsol.cargo.core.error.CoreErrorKind;
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,27 +17,46 @@ public class ApiControllerAdvice {
 
 	private static final Logger log = LoggerFactory.getLogger(ApiControllerAdvice.class);
 
-	@ExceptionHandler(CoreApiException.class)
-	public ResponseEntity<ApiResponse<Object>> handleCoreException(CoreApiException e) {
+	@ExceptionHandler(CoreException.class)
+	public ResponseEntity<ApiResponse<Object>> handleCoreException(CoreException e) {
 
-		switch (e.getCoreApiErrorType().getLogLevel()) {
-			case ERROR -> log.error("CoreException : {}", e.getMessage(), e);
-			case WARN -> log.warn("CoreException : {}", e.getMessage(), e);
-			default -> log.info("CoreException : {}", e.getMessage(), e);
-		}
+		CoreErrorType errorType = e.getErrorType();
 
-		ApiResponse<Object> apiResponse = ApiResponse.error(e.getCoreApiErrorType(), e.getData());
+		logError(errorType, e);
 
-		return new ResponseEntity<>(apiResponse, e.getCoreApiErrorType().getStatus());
+		ApiResponse<Object> apiResponse = ApiResponse.error(errorType, null);
+
+		HttpStatus status = mapKindToHttpStatus(errorType.getKind());
+
+		return new ResponseEntity<>(apiResponse, status);
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<Object>> handleException(Exception e) {
 		log.error("Exception : {}", e.getMessage(), e);
 
-		ApiResponse<Object> apiResponse = ApiResponse.error(CoreApiErrorType.DEFAULT_ERROR, null);
+		ApiResponse<Object> apiResponse = ApiResponse.error(CoreErrorType.NOT_FOUND_DATA, null);
 
-		return new ResponseEntity<>(apiResponse, CoreApiErrorType.DEFAULT_ERROR.getStatus());
+		return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	private void logError(CoreErrorType errorType, Exception e) {
+		switch (errorType.getLevel()) {
+			case ERROR -> log.error("CoreException : {}", e.getMessage(), e);
+			case WARN -> log.warn("CoreException : {}", e.getMessage(), e);
+			default -> log.info("CoreException : {}", e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * 도메인 에러의 Kind를 HTTP Status로 번역
+	 */
+	private HttpStatus mapKindToHttpStatus(CoreErrorKind kind) {
+		return switch (kind) {
+			case CLIENT_ERROR -> HttpStatus.BAD_REQUEST; // 400
+			case SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR; // 500
+			// (향후 UNAUTHORIZED, FORBIDDEN 등 Kind가 추가되면 여기만 수정)
+		};
 	}
 
 }

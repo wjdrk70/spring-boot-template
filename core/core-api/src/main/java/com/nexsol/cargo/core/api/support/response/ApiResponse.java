@@ -1,7 +1,7 @@
 package com.nexsol.cargo.core.api.support.response;
 
 import com.nexsol.cargo.core.api.support.error.CoreApiErrorMessage;
-import com.nexsol.cargo.core.api.support.error.CoreApiErrorType;
+import com.nexsol.cargo.core.error.CoreErrorType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,11 @@ public class ApiResponse<T> {
 		return new ApiResponse<>(ResultType.SUCCESS, data, null);
 	}
 
-	public static <S> ApiResponse<S> error(CoreApiErrorType error, Object errorData) {
+	public static <S> ApiResponse<S> error(CoreErrorType error, Object errorData) {
 		return new ApiResponse<>(ResultType.ERROR, null, new CoreApiErrorMessage(error, errorData));
 	}
 
-	public static <S> ApiResponse<S> error(CoreApiErrorType error) {
+	public static <S> ApiResponse<S> error(CoreErrorType error) {
 		return new ApiResponse<>(ResultType.ERROR, null, new CoreApiErrorMessage(error, null));
 	}
 

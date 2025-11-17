@@ -28,7 +28,7 @@ public class PlanGenerator {
 
 		return topCoverageSets.stream().map(codeSet -> {
 
-			CoverageMaster masterSet = masterReader.findValidatedMaster(codeSet);
+			CoverageMaster masterSet = masterReader.read(codeSet);
 
 			BigDecimal premium = premiumCalculator.calculate(cargoDetail, quotation.getExchangeRateAmount(),
 					masterSet.baseCoverage(), masterSet.options());

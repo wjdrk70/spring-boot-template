@@ -15,8 +15,10 @@ public enum CoreErrorType {
 	AUTH_UNAUTHORIZED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C1002, "비밀번호가 틀렸습니다.", CoreErrorLevel.ERROR),
 
 	// Plan
-	CARGO_ITEM_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C2000, "해당 HS Code에 맞는 화물 정보를 찾을 수 없습니다.",
+	CARGO_ITEM_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C2000, "해당 적하품목이 없습니다.", CoreErrorLevel.INFO),
+	VOYAGE_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C2001, "출발지에 해당하는 항해구간코드를 찾을 수 없습니다.",
 			CoreErrorLevel.INFO),
+	BASE_RATE_NOT_FOUND(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C2002, "기본 요율을 찾을 수 없습니다.", CoreErrorLevel.INFO),
 
 	// pay
 	PAYMENT_AUTH_FAILED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C4000, "PG사 인증에 실패했습니다.", CoreErrorLevel.WARN),
@@ -24,7 +26,9 @@ public enum CoreErrorType {
 			CoreErrorLevel.ERROR),
 	PAYMENT_AMOUNT_MISMATCH(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C4002, "결제 요청 금액과 DB 저장 금액이 일치하지 않습니다.",
 			CoreErrorLevel.ERROR),
-	PAYMENT_NOT_FOUND(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C4003, "결제 정보를 찾을 수 없습니다.", CoreErrorLevel.WARN);
+	PAYMENT_NOT_FOUND(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C4003, "결제 정보를 찾을 수 없습니다.", CoreErrorLevel.WARN),
+	PAYMENT_CANCEL_FAILED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C4004, "이미 취소되었거나 성공한 결제가 아닙니다.",
+			CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 
