@@ -21,8 +21,9 @@ public class SubscriptionCoverageRepositoryImpl implements SubscriptionCoverageR
 	private final SubscriptionCoverageJpaRepository subscriptionCoverageJpaRepository;
 
 	@Override
-	public List<SubscriptionCoverageSet> findByHsCode(String hsCode) {
-		List<Long> subscriptionIds = subscriptionCargoJpaRepository.findByHsCode(hsCode)
+	public List<SubscriptionCoverageSet> findByMiddleCode(String middleCode) {
+
+		List<Long> subscriptionIds = subscriptionCargoJpaRepository.findByHsCodeStartingWith(middleCode)
 			.stream()
 			.map(SubscriptionCargoEntity::getSubscriptionId)
 			.distinct()

@@ -11,6 +11,9 @@ public enum CoreErrorCode {
 	C2000, C2001, C2002,
 
 	// Pay
-	C4000, C4001, C4002, C4003, C4004;
+	C4000, C4001, C4002, C4003, C4004,
+
+	// subscription
+	C5000;
 
 }

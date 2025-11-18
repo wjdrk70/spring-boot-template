@@ -15,6 +15,8 @@ public class PlanRecommendationService {
 
 	private final SubscriptionCoverageReader subscriptionCoverageReader;
 
+	private final CargoItemFinder cargoItemFinder;
+
 	private final PlanAnalyzer planAnalyzer;
 
 	private final PlanGenerator planGenerator;
@@ -25,8 +27,9 @@ public class PlanRecommendationService {
 
 		Quotation quotation = quotationReader.read(quotationKey);
 
-		// 과거 계약을 분석
-		List<SubscriptionCoverageSet> coverageSets = subscriptionCoverageReader.readCoverageSet(quotation.getHsCode());
+		String middleCode = cargoItemFinder.find(quotation.getHsCode());
+
+		List<SubscriptionCoverageSet> coverageSets = subscriptionCoverageReader.readCoverageSet(middleCode);
 
 		List<Set<String>> topCoverageSets = planAnalyzer.getTopFrequentCoverageSets(coverageSets, TOP_N);
 

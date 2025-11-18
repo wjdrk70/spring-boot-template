@@ -31,11 +31,11 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource))
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/v1/auth/register", "/v1/auth/login")
+			.authorizeHttpRequests(auth -> auth.requestMatchers("/health", "/v1/auth/register", "/v1/auth/login")
 				.permitAll()
 				.requestMatchers("/v1/payments/callback/**") // success, fail 모두 허용
 				.permitAll()
-				.requestMatchers("/v1/plan/recommend", "/v1/quotations", "/v1/subscriptions", "/v1/payments/**")
+				.requestMatchers("/v1/plan/recommend", "/v1/quotations", "/v1/subscriptions/**", "/v1/payments/**")
 				.authenticated()// UserRole 에 있는 유저만
 				.anyRequest()
 				.authenticated())
@@ -49,13 +49,12 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 
 		config.setAllowCredentials(true);
-		 config.setAllowedOrigins(
-		 List.of("http://localhost:3000"));
-//		config.setAllowedOriginPatterns(List.of("*"));
+		config.setAllowedOrigins(List.of("https://dev-cargo-busan.nexsol.ai/", "http://localhost:3000"));
+		// config.setAllowedOriginPatterns(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
-		 config.setExposedHeaders(List.of("Authorization"));
-//		config.setExposedHeaders(List.of("*"));
+		config.setExposedHeaders(List.of("Authorization"));
+		// config.setExposedHeaders(List.of("*"));
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
 

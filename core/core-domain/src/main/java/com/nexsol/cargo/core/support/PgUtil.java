@@ -51,11 +51,18 @@ public class PgUtil {
 		}
 	}
 
-	public String generateSignature(String mid, String amt) {
-		String plainText = mid + amt + this.merchantKey;
+	/**
+	 * 1단계: 결제창 요청용 서명 (Moid 제외) (수정: ediDate 파라미터 추가 및 순서 변경)
+	 */
+	public String generateSignature(String mid, String amt, String ediDate) {
+		// 💡 수정: (EdiDate + MID + Amt + MerchantKey) 순서로 변경
+		String plainText = ediDate + mid + amt + this.merchantKey;
 		return sha256Util.sha(plainText);
 	}
 
+	/**
+	 * 2단계: 키인(Key-In) 결제용 서명 (Moid 포함)
+	 */
 	public String generateKeyInSignature(String mid, String amt, String ediDate, String moid) {
 		String plainText = mid + amt + ediDate + moid + this.merchantKey;
 		return sha256Util.sha(plainText);

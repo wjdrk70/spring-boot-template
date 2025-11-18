@@ -28,6 +28,10 @@ public enum CoreErrorType {
 			CoreErrorLevel.ERROR),
 	PAYMENT_NOT_FOUND(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C4003, "결제 정보를 찾을 수 없습니다.", CoreErrorLevel.WARN),
 	PAYMENT_CANCEL_FAILED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C4004, "이미 취소되었거나 성공한 결제가 아닙니다.",
+			CoreErrorLevel.INFO),
+
+	// subscription
+	POLICY_CANNOT_BE_ISSUED(CoreErrorKind.CLIENT_ERROR, CoreErrorCode.C5000, "결제가 완료되지 않아 증권을 발급할 수 없습니다.",
 			CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;

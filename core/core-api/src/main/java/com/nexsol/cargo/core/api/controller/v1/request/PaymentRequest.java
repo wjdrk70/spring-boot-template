@@ -32,6 +32,8 @@ public class PaymentRequest {
 
 	private String NetCancelURL;
 
+	private String EdiDate;
+
 	public CreatePayment toCreatePayment() {
 		return CreatePayment.builder()
 			.authResultCode(this.AuthResultCode)
@@ -43,6 +45,7 @@ public class PaymentRequest {
 			.signature(this.Signature)
 			.nextAppURL(this.NextAppURL)
 			.netCancelURL(this.NetCancelURL)
+			.ediDate(this.EdiDate)
 			.build();
 	}
 

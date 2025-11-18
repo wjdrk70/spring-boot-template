@@ -52,17 +52,28 @@ public class NicePayUtil {
 			});
 		}
 		catch (Exception e) {
-			log.error("[NicePayments] 응답 파싱 실패.", e);
+			log.error("[NicePayments] 응답 파싱 실패. Raw Response: {}", responseString, e);
 			throw new CoreException(CoreErrorType.PAYMENT_AUTH_FAILED);
 		}
 	}
+
+	private static final String RESULT_CODE_APPROVE_SUCCESS = "3001";
 
 	public void validateResponse(Map<String, String> responseMap, String tid) {
 		if (responseMap == null || responseMap.get("ResultCode") == null) {
 			log.error("[NicePayments] 응답 오류 TID: {}", tid);
 			throw new CoreException(CoreErrorType.PAYMENT_AUTH_FAILED);
 		}
-		// 필요한 경우 성공 코드가 아닌 경우 Exception을 던지는 로직 추가
+		String resultCode = responseMap.get("ResultCode");
+		String resultMsg = responseMap.get("ResultMsg");
+
+		// (키인 결제 등 다른 성공 코드가 있다면 || 로 추가)
+		if (!RESULT_CODE_APPROVE_SUCCESS.equals(resultCode)) {
+			log.warn("[NicePayments] PG 승인 실패. TID: {}, Code: {}, Msg: {}", tid, resultCode, resultMsg);
+			// RuntimeException 대신 PG 오류 메시지를 포함하는 CoreException을 던지는 것이 좋습니다.
+			// (예: throw new CoreException(CoreErrorType.PAYMENT_AUTH_FAILED, resultMsg);)
+			throw new RuntimeException("PG 결제 승인 실패: " + resultMsg);
+		}
 	}
 
 	public String makeSignature(String plainText) {

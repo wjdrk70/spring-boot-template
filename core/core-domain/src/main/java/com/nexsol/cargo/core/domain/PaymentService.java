@@ -58,7 +58,9 @@ public class PaymentService {
 		String moid = String.valueOf(savedPayment.getId());
 		String amt = pgUtil.format(premium);
 		String ediDat = LocalDateTime.now().format(EDI_DATE_FORMATTER);
-		String signData = pgUtil.generateSignature(this.mid, amt);
+
+		// 💡 수정: pgUtil.generateSignature 호출 시 ediDat 파라미터 전달
+		String signData = pgUtil.generateSignature(this.mid, amt, ediDat);
 
 		return new PaymentReadyResult(moid, this.mid, amt, ediDat, signData);
 

@@ -27,7 +27,7 @@ public class PlanResponse {
 
 	private List<CoverageResponse> extensionCoverages; // 확장조건
 
-	public static PlanResponse fromDomain(RecommendPlan plan) {
+	public static PlanResponse of(RecommendPlan plan) {
 		BaseCoverage base = plan.baseCoverage();
 		List<OptionCoverage> options = plan.optionCoverages();
 

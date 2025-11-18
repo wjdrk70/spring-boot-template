@@ -39,6 +39,9 @@ public class SubscriptionEntity extends BaseEntity {
 	@Column(name = "insured_company_code")
 	private String insuredCompanyCode;
 
+	@Column(name = "policy_number", length = 100)
+	private String policyNumber;
+
 	public static SubscriptionEntity fromDomain(Subscription domain) {
 		SubscriptionEntity entity = new SubscriptionEntity();
 
@@ -50,8 +53,32 @@ public class SubscriptionEntity extends BaseEntity {
 		entity.policyholderCompanyCode = domain.getPolicyholderCompanyCode();
 		entity.insuredCompanyName = domain.getInsuredCompanyName();
 		entity.insuredCompanyCode = domain.getInsuredCompanyCode();
+		entity.policyNumber = domain.getPolicyNumber();
 
 		return entity;
+	}
+
+	public void updateFromDomain(Subscription domain) {
+
+		this.status = domain.getStatus();
+		this.policyNumber = domain.getPolicyNumber();
+
+	}
+
+	public Subscription toDomain() {
+		return Subscription.builder()
+			.id(this.getId()) // 💡 ID 포함
+			.userId(this.userId)
+			.status(this.status)
+			.policyNumber(this.policyNumber)
+			.insurancePremium(this.insurancePremium)
+			.isSame(this.isSame)
+			.policyholderCompanyName(this.policyholderCompanyName)
+			.policyholderCompanyCode(this.policyholderCompanyCode)
+			.insuredCompanyName(this.insuredCompanyName)
+			.insuredCompanyCode(this.insuredCompanyCode)
+			// (cargoDetail, subscriptionCoverages는 RepositoryImpl에서 조립)
+			.build();
 	}
 
 }

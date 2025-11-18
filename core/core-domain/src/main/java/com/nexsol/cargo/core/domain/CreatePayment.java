@@ -25,4 +25,6 @@ public class CreatePayment {
 
 	private String netCancelURL;
 
+	private String ediDate;
+
 }

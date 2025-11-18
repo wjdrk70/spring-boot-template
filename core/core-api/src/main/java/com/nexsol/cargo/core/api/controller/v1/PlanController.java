@@ -27,9 +27,7 @@ public class PlanController {
 
 		List<RecommendPlan> recommendedPlans = planRecommendationService.recommendPlans(request.quotationKey());
 
-		List<PlanResponse> response = recommendedPlans.stream()
-			.map(PlanResponse::fromDomain)
-			.collect(Collectors.toList());
+		List<PlanResponse> response = recommendedPlans.stream().map(PlanResponse::of).collect(Collectors.toList());
 
 		return ApiResponse.success(response);
 	}

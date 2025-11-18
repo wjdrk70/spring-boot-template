@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface SubscriptionCoverageRepository {
 
-	List<SubscriptionCoverageSet> findByHsCode(String hsCode);
+	List<SubscriptionCoverageSet> findByMiddleCode(String middleCode);
 
 }

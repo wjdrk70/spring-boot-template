@@ -1,6 +1,5 @@
 package com.nexsol.cargo.core.api.controller;
 
-
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
 import com.nexsol.cargo.core.error.CoreErrorKind;
 import com.nexsol.cargo.core.error.CoreErrorType;

@@ -86,6 +86,8 @@ public class NicePaymentsClient implements PaymentGatewayClient {
 		}
 		catch (Exception e) {
 			log.error("[NicePayments] 망취소 실패. TID: {}", txTid, e);
+			// 💡 해결: 망취소 실패도 CoreException 등으로 감싸서 다시 던집니다.
+			throw new RuntimeException("PG 망취소 요청 실패", e);
 		}
 
 	}

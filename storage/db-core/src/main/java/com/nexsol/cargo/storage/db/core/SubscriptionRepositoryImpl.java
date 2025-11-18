@@ -26,9 +26,35 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
 	@Override
 	public Subscription save(Subscription subscription) {
-		SubscriptionEntity entity = SubscriptionEntity.fromDomain(subscription);
-		SubscriptionEntity savedEntity = subscriptionJpaRepository.save(entity);
 
+		if (subscription.getId() == null) {
+			return createNewSubscription(subscription);
+		}
+		else {
+			return updateExistingSubscription(subscription);
+		}
+	}
+
+	private Subscription updateExistingSubscription(Subscription subscription) {
+		SubscriptionEntity managedEntity = subscriptionJpaRepository.findById(subscription.getId())
+			.orElseThrow(() -> new RuntimeException("업데이트할 Subscription을 찾을 수 없습니다. ID: " + subscription.getId())); // TODO:
+																													// CoreException으로
+																													// 변경
+
+		managedEntity.updateFromDomain(subscription);
+
+		subscriptionJpaRepository.save(managedEntity);
+
+		return findById(subscription.getId()).orElseThrow(() -> new RuntimeException("업데이트 후 Subscription 조회 실패")); // TODO:
+																													// CoreException으로
+																													// 변경
+	}
+
+	private Subscription createNewSubscription(Subscription subscription) {
+
+		SubscriptionEntity entity = SubscriptionEntity.fromDomain(subscription);
+
+		SubscriptionEntity savedEntity = subscriptionJpaRepository.save(entity);
 		Long newSubscriptionId = savedEntity.getId();
 
 		SubscriptionCargoEntity cargoEntity = SubscriptionCargoEntity.fromDomain(subscription.getCargoDetail(),
@@ -44,19 +70,9 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 			subscriptionCoverageJpaRepository.saveAll(coverageEntities);
 		}
 
-		return Subscription.builder()
-			.id(newSubscriptionId)
-			.userId(subscription.getUserId())
-			.status(subscription.getStatus())
-			.insurancePremium(subscription.getInsurancePremium())
-			.isSame(subscription.isSame())
-			.policyholderCompanyName(subscription.getPolicyholderCompanyName())
-			.policyholderCompanyCode(subscription.getPolicyholderCompanyCode())
-			.insuredCompanyName(subscription.getInsuredCompanyName())
-			.insuredCompanyCode(subscription.getInsuredCompanyCode())
-			.cargoDetail(subscription.getCargoDetail())
-			.subscriptionCoverages(subscription.getSubscriptionCoverages())
-			.build();
+		return findById(newSubscriptionId).orElseThrow(() -> new RuntimeException("생성 후 Subscription 조회 실패")); // TODO:
+																												// CoreException으로
+																												// 변경
 	}
 
 	@Override
@@ -70,17 +86,18 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
 		CargoDetail cargoDetail = subscriptionCargoJpaRepository.findById(subscriptionId)
 			.map(SubscriptionCargoEntity::toDomain)
-			.orElse(null);
+			.orElse(null); // (Cargo는 조회 실패시 null일 수 있음)
 
 		List<SubscriptionCoverage> coverages = subscriptionCoverageJpaRepository.findBySubscriptionId(subscriptionId)
 			.stream()
 			.map(SubscriptionCoverageEntity::toDomain)
 			.collect(Collectors.toList());
 
-		Subscription subscription = Subscription.builder()
-			.id(subscriptionId)
+		return Optional.of(Subscription.builder()
+			.id(subEntity.getId())
 			.userId(subEntity.getUserId())
 			.status(subEntity.getStatus())
+			.policyNumber(subEntity.getPolicyNumber())
 			.insurancePremium(subEntity.getInsurancePremium())
 			.isSame(subEntity.getIsSame())
 			.policyholderCompanyName(subEntity.getPolicyholderCompanyName())
@@ -89,9 +106,7 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 			.insuredCompanyCode(subEntity.getInsuredCompanyCode())
 			.cargoDetail(cargoDetail)
 			.subscriptionCoverages(coverages)
-			.build();
-
-		return Optional.of(subscription);
+			.build());
 	}
 
 }
