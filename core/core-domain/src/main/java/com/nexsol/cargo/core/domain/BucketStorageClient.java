@@ -1,5 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
+import org.springframework.stereotype.Component;
+
 public interface BucketStorageClient {
 
 	/**

@@ -1,6 +1,8 @@
 package com.nexsol.cargo.core.support;
 
 import com.nexsol.cargo.core.domain.*;
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

@@ -116,19 +116,24 @@ public class SubscriptionService {
 		return bucketStorageClient.generateDownloadPresignedUrl(signatureKey);
 	}
 
-	public DomainPage<SubscriptionContract> getMyContracts(Long userId, DomainPageRequest pageRequest) {
+	public SubscriptionSummery<SubscriptionContract> getMyContracts(Long userId, DomainPageRequest pageRequest) {
 
-		DomainPage<Subscription> pages = subscriptionReader.readAllByUserId(userId, pageRequest);
+		SubscriptionSummery<Subscription> entityResult = subscriptionReader.readAllByUserId(userId, pageRequest);
 
-		return contractMapper.map(pages);
+		return contractMapper.map(entityResult);
 	}
 
-	public DomainPage<SubscriptionContract> searchMyContracts(Long userId, SubscriptionSearch contract,
+	public SubscriptionSummery<SubscriptionContract> searchMyContracts(Long userId, SubscriptionSearch contract,
 			DomainPageRequest pageRequest) {
 
-		DomainPage<Subscription> pages = subscriptionSearcher.search(userId, contract, pageRequest);
+		SubscriptionSummery<Subscription> entityResult = subscriptionSearcher.search(userId, contract, pageRequest);
 
-		return contractMapper.map(pages);
+		return contractMapper.map(entityResult);
+	}
+
+	public Subscription getSubscription(Long userId, Long subscriptionId) {
+
+		return subscriptionReader.read(subscriptionId, userId);
 	}
 
 }

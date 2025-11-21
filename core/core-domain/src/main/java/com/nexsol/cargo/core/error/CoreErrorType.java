@@ -43,7 +43,8 @@ public enum CoreErrorType {
 	SUBSCRIPTION_PRESIGNED_URL_FAILED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C5004, "Presigned URL 생성 실패",
 			CoreErrorLevel.INFO),
 	SUBSCRIPTION_PENDING_FAILED(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C5005, "결제가 완료되었거나,취소된 청약입니다.",
-			CoreErrorLevel.INFO);
+			CoreErrorLevel.INFO),
+	SUBSCRIPTION_NOR_FOUND_DATA(CoreErrorKind.SERVER_ERROR, CoreErrorCode.C5006, "청약건을 찾을수 없습니다.", CoreErrorLevel.INFO);
 
 	private final CoreErrorKind kind;
 

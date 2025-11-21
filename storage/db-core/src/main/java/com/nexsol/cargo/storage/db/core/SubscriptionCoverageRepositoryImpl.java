@@ -1,7 +1,7 @@
 package com.nexsol.cargo.storage.db.core;
 
-import com.nexsol.cargo.core.domain.SubscriptionCoverageRepository;
 import com.nexsol.cargo.core.domain.SubscriptionCoverageSet;
+import com.nexsol.cargo.core.domain.SubscriptionCoverageRepository;
 import com.nexsol.cargo.storage.db.core.entity.SubscriptionCargoEntity;
 import com.nexsol.cargo.storage.db.core.entity.SubscriptionCoverageEntity;
 import lombok.RequiredArgsConstructor;

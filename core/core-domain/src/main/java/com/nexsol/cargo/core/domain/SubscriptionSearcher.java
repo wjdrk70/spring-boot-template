@@ -11,7 +11,7 @@ public class SubscriptionSearcher {
 
 	private final SubscriptionRepository subscriptionRepository;
 
-	public DomainPage<Subscription> search(Long userId, SubscriptionSearch contract, DomainPageRequest pageRequest) {
+	public SubscriptionSummery search(Long userId, SubscriptionSearch contract, DomainPageRequest pageRequest) {
 		return subscriptionRepository.searchByContract(userId, contract, pageRequest);
 	}
 

@@ -31,7 +31,7 @@ public class SubscriptionReader {
 		return subscription;
 	}
 
-	public DomainPage<Subscription> readAllByUserId(Long userId, DomainPageRequest pageRequest) {
+	public SubscriptionSummery readAllByUserId(Long userId, DomainPageRequest pageRequest) {
 		return subscriptionRepository.findAllByUserId(userId, pageRequest);
 	}
 

@@ -115,6 +115,8 @@ CREATE TABLE voyage
     name        VARCHAR(100) NOT NULL COMMENT '항해구간 명 (e.g., 보세외항)'
 ) COMMENT '항해구간';
 
+
+
 CREATE TABLE base_rate
 (
     id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -273,3 +275,4 @@ CREATE TABLE payment
     CONSTRAINT fk_payment_subscription
         FOREIGN KEY (subscription_id) REFERENCES `subscription` (id) ON DELETE CASCADE
 ) COMMENT '결제내역';
+

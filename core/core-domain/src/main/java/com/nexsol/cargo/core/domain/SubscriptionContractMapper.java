@@ -16,9 +16,11 @@ public class SubscriptionContractMapper {
 
 	private final PaymentReader paymentReader;
 
-	public DomainPage<SubscriptionContract> map(DomainPage<Subscription> subscriptionPage) {
+	public SubscriptionSummery<SubscriptionContract> map(SubscriptionSummery summery) {
+		DomainPage<Subscription> subscriptionPage = summery.page();
+
 		if (subscriptionPage.content().isEmpty()) {
-			return DomainPage.empty(subscriptionPage);
+			return new SubscriptionSummery(DomainPage.empty(), summery.totalPremium());
 		}
 
 		List<Long> ids = subscriptionPage.content().stream().map(Subscription::getId).toList();
@@ -29,8 +31,10 @@ public class SubscriptionContractMapper {
 			return mapToContract(sub, method);
 		}).toList();
 
-		return new DomainPage<>(contracts, subscriptionPage.totalElements(), subscriptionPage.totalPages(),
-				subscriptionPage.currentPage(), subscriptionPage.hasNext());
+		DomainPage<SubscriptionContract> contractPage = new DomainPage<>(contracts, subscriptionPage.totalElements(),
+				subscriptionPage.totalPages(), subscriptionPage.currentPage(), subscriptionPage.hasNext());
+
+		return new SubscriptionSummery(contractPage, summery.totalPremium());
 	}
 
 	private SubscriptionContract mapToContract(Subscription sub, PaymentMethod method) {

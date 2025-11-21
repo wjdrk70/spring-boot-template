@@ -3,8 +3,7 @@ package com.nexsol.cargo.storage.db.core.entity;
 import com.nexsol.cargo.core.domain.User;
 import com.nexsol.cargo.core.enums.UserRole;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 

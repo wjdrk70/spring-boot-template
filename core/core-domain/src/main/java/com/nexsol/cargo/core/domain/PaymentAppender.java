@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
 import com.nexsol.cargo.core.enums.PaymentMethod;
+import com.nexsol.cargo.core.enums.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

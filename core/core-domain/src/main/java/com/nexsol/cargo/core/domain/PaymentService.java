@@ -6,6 +6,7 @@ import com.nexsol.cargo.core.error.CoreErrorType;
 import com.nexsol.cargo.core.error.CoreException;
 import com.nexsol.cargo.core.support.CardEncryptor;
 import com.nexsol.cargo.core.support.PgUtil;
+import com.nexsol.cargo.core.support.Sha256Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 

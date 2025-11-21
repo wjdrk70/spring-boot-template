@@ -40,10 +40,13 @@ storage:
 ---
 spring.config.activate.on-profile: local-dev
 spring:
+  jmx:
+    enabled: false
   docker:
     compose:
       enabled: true
   flyway:
+    enabled: false
     validate-on-migrate: false
 storage:
   datasource:

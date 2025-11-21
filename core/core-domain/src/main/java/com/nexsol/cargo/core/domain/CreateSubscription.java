@@ -2,6 +2,7 @@ package com.nexsol.cargo.core.domain;
 
 import lombok.Builder;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Builder

@@ -1,7 +1,8 @@
 package com.nexsol.cargo.core.api.controller.v1;
 
-import com.nexsol.cargo.core.api.controller.v1.request.SubscriptionSearchRequest;
+import com.nexsol.cargo.core.api.controller.v1.request.SubscriptionListRequest;
 import com.nexsol.cargo.core.api.controller.v1.response.SubscriptionContractResponse;
+import com.nexsol.cargo.core.api.controller.v1.response.SubscriptionListResponse;
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
 import com.nexsol.cargo.core.api.support.response.PageResponse;
 import com.nexsol.cargo.core.domain.SubscriptionContract;
@@ -24,17 +25,13 @@ public class SubscriptionSearchController {
 	private final SubscriptionService subscriptionService;
 
 	@GetMapping
-	public ApiResponse<PageResponse<SubscriptionContractResponse>> search(@AuthenticationPrincipal Long userId,
-			@ModelAttribute SubscriptionSearchRequest request) {
-		DomainPage<SubscriptionContract> domainPage = subscriptionService.searchMyContracts(userId,
-				request.toSubscriptionSearch(), request.toPageRequest());
+	public ApiResponse<SubscriptionListResponse> search(@AuthenticationPrincipal Long userId,
+			@ModelAttribute SubscriptionListRequest request) {
 
-		List<SubscriptionContractResponse> responseContent = domainPage.content()
-			.stream()
-			.map(SubscriptionContractResponse::of)
-			.toList();
+		var summery = subscriptionService.searchMyContracts(userId, request.toSubscriptionSearch(),
+				request.toPageRequest());
 
-		return ApiResponse.success(PageResponse.of(domainPage, responseContent));
+		return ApiResponse.success(SubscriptionListResponse.of(summery));
 	}
 
 }

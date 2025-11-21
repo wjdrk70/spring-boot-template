@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.api.support.response;
 
 import com.nexsol.cargo.core.api.support.error.CoreApiErrorMessage;
+import com.nexsol.cargo.core.api.support.error.CoreApiErrorType;
 import com.nexsol.cargo.core.error.CoreErrorType;
 import lombok.AccessLevel;
 import lombok.Getter;

@@ -1,15 +1,18 @@
 package com.nexsol.cargo.storage.db.core;
 
-import com.nexsol.cargo.core.domain.CargoDetail;
-import com.nexsol.cargo.core.domain.Subscription;
-import com.nexsol.cargo.core.domain.SubscriptionCoverage;
-import com.nexsol.cargo.core.domain.SubscriptionRepository;
+import com.nexsol.cargo.core.domain.*;
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import com.nexsol.cargo.core.support.DomainPage;
 import com.nexsol.cargo.core.support.DomainPageRequest;
 import com.nexsol.cargo.storage.db.core.entity.SubscriptionCargoEntity;
 import com.nexsol.cargo.storage.db.core.entity.SubscriptionCoverageEntity;
 import com.nexsol.cargo.storage.db.core.entity.SubscriptionEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,8 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
 	private final SubscriptionCoverageJpaRepository subscriptionCoverageJpaRepository;
 
+	private final EntityManager entityManager;
+
 	@Override
 	public Subscription save(Subscription subscription) {
 
@@ -49,17 +55,14 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
 	private Subscription updateExistingSubscription(Subscription subscription) {
 		SubscriptionEntity managedEntity = subscriptionJpaRepository.findById(subscription.getId())
-			.orElseThrow(() -> new RuntimeException("업데이트할 Subscription을 찾을 수 없습니다. ID: " + subscription.getId())); // TODO:
-		// CoreException으로
-		// 변경
+			.orElseThrow(() -> new CoreException(CoreErrorType.SUBSCRIPTION_NOR_FOUND_DATA));
 
 		managedEntity.updateFromDomain(subscription);
 
 		subscriptionJpaRepository.save(managedEntity);
 
-		return findById(subscription.getId()).orElseThrow(() -> new RuntimeException("업데이트 후 Subscription 조회 실패")); // TODO:
-		// CoreException으로
-		// 변경
+		return findById(subscription.getId())
+			.orElseThrow(() -> new CoreException(CoreErrorType.SUBSCRIPTION_NOR_FOUND_DATA));
 	}
 
 	private Subscription createNewSubscription(Subscription subscription) {
@@ -82,9 +85,8 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 			subscriptionCoverageJpaRepository.saveAll(coverageEntities);
 		}
 
-		return findById(newSubscriptionId).orElseThrow(() -> new RuntimeException("생성 후 Subscription 조회 실패")); // TODO:
-		// CoreException으로
-		// 변경
+		return findById(newSubscriptionId)
+			.orElseThrow(() -> new CoreException(CoreErrorType.SUBSCRIPTION_NOR_FOUND_DATA));
 	}
 
 	@Override
@@ -125,70 +127,57 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 	}
 
 	@Override
-	public DomainPage<Subscription> findAllByUserId(Long userId, DomainPageRequest pageRequest) {
-		// 1. Pageable 변환
-		Pageable pageable = PageRequest.of(pageRequest.page(), pageRequest.size(), Sort.by("id").descending());
+	public SubscriptionSummery<Subscription> findAllByUserId(Long userId, DomainPageRequest pageRequest) {
+		SubscriptionSearch emptyCondition = new SubscriptionSearch(null, null, null);
 
-		// 2. Entity 조회
-		Page<SubscriptionEntity> subPage = subscriptionJpaRepository.findByUserId(userId, pageable);
-		List<SubscriptionEntity> entities = subPage.getContent();
-
-		if (entities.isEmpty()) {
-			return DomainPage.empty();
-		}
-
-		// 3. N+1 방지를 위한 하위 데이터 조회 (Cargo, Coverage)
-		// Payment 조회 로직은 여기서 완전히 제거되었습니다.
-		List<Long> subIds = entities.stream().map(SubscriptionEntity::getId).toList();
-
-		Map<Long, SubscriptionCargoEntity> cargoMap = subscriptionCargoJpaRepository.findBySubscriptionIdIn(subIds)
-			.stream()
-			.collect(Collectors.toMap(SubscriptionCargoEntity::getSubscriptionId, Function.identity()));
-
-
-		List<Subscription> subscriptions = entities.stream().map(entity -> {
-			SubscriptionCargoEntity cargoEntity = cargoMap.get(entity.getId());
-			CargoDetail cargoDetail = (cargoEntity != null) ? cargoEntity.toDomain() : null;
-
-			return entity.toDomain().toBuilder().cargoDetail(cargoDetail).build();
-		}).toList();
-
-		return new DomainPage<>(subscriptions, subPage.getTotalElements(), subPage.getTotalPages(), subPage.getNumber(),
-				subPage.hasNext());
+		return searchByContract(userId, emptyCondition, pageRequest);
 	}
 
 	@Override
-	public DomainPage<Subscription> searchByContract(Long userId, SubscriptionSearch contract,
+	public SubscriptionSummery<Subscription> searchByContract(Long userId, SubscriptionSearch contract,
 			DomainPageRequest pageRequest) {
 		Pageable pageable = PageRequest.of(pageRequest.page(), pageRequest.size(), Sort.by("id").descending());
 
-		Specification<SubscriptionEntity> spec = (root, query, cb) -> {
-			List<Predicate> predicates = new ArrayList<>();
-
-			predicates.add(cb.equal(root.get("userId"), userId));
-
-			if (contract.keyword() != null && !contract.keyword().isBlank()) {
-				String likePattern = "%" + contract.keyword() + "%";
-				predicates.add(cb.or(cb.like(root.get("policyholderCompanyName"), likePattern),
-						cb.like(root.get("insuredCompanyName"), likePattern)));
-			}
-
-			if (contract.startDate() != null) {
-				predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), contract.startDate().atStartOfDay()));
-			}
-
-			if (contract.endDate() != null) {
-				predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), contract.endDate().atTime(LocalTime.MAX)));
-			}
-
-			return cb.and(predicates.toArray(new Predicate[0]));
-		};
+		Specification<SubscriptionEntity> spec = createSpec(userId, contract);
 
 		Page<SubscriptionEntity> subPage = subscriptionJpaRepository.findAll(spec, pageable);
-		List<SubscriptionEntity> entities = subPage.getContent();
 
+		BigDecimal totalPremium = calculateTotalPremium(spec);
+
+		List<Subscription> subscriptions = mapToDomainList(subPage.getContent());
+
+		DomainPage<Subscription> domainPage = new DomainPage<>(subscriptions, subPage.getTotalElements(),
+				subPage.getTotalPages(), subPage.getNumber(), subPage.hasNext());
+
+		return new SubscriptionSummery(domainPage, totalPremium);
+	}
+
+	private Specification<SubscriptionEntity> createSpec(Long userId, SubscriptionSearch contract) {
+		return (root, query, cb) -> {
+			List<Predicate> predicates = new ArrayList<>();
+			predicates.add(cb.equal(root.get("userId"), userId));
+
+			if (contract != null) { // 조건이 있을 때만 추가
+				if (contract.keyword() != null && !contract.keyword().isBlank()) {
+					String likePattern = "%" + contract.keyword() + "%";
+					predicates.add(cb.or(cb.like(root.get("policyholderCompanyName"), likePattern),
+							cb.like(root.get("insuredCompanyName"), likePattern)));
+				}
+				if (contract.startDate() != null) {
+					predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), contract.startDate().atStartOfDay()));
+				}
+				if (contract.endDate() != null) {
+					predicates
+						.add(cb.lessThanOrEqualTo(root.get("createdAt"), contract.endDate().atTime(LocalTime.MAX)));
+				}
+			}
+			return cb.and(predicates.toArray(new Predicate[0]));
+		};
+	}
+
+	private List<Subscription> mapToDomainList(List<SubscriptionEntity> entities) {
 		if (entities.isEmpty()) {
-			return DomainPage.empty();
+			return List.of();
 		}
 
 		List<Long> subIds = entities.stream().map(SubscriptionEntity::getId).toList();
@@ -197,15 +186,30 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 			.stream()
 			.collect(Collectors.toMap(SubscriptionCargoEntity::getSubscriptionId, Function.identity()));
 
-		List<Subscription> subscriptions = entities.stream().map(entity -> {
+		return entities.stream().map(entity -> {
 			SubscriptionCargoEntity cargoEntity = cargoMap.get(entity.getId());
 			CargoDetail cargoDetail = (cargoEntity != null) ? cargoEntity.toDomain() : null;
 
 			return entity.toDomain().toBuilder().cargoDetail(cargoDetail).build();
 		}).toList();
+	}
 
-		return new DomainPage<>(subscriptions, subPage.getTotalElements(), subPage.getTotalPages(), subPage.getNumber(),
-				subPage.hasNext());
+	private BigDecimal calculateTotalPremium(Specification<SubscriptionEntity> spec) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> query = cb.createQuery(BigDecimal.class);
+		Root<SubscriptionEntity> root = query.from(SubscriptionEntity.class);
+
+		query.select(cb.sum(root.get("insurancePremium")));
+
+		if (spec != null) {
+			Predicate predicate = spec.toPredicate(root, query, cb);
+			if (predicate != null) {
+				query.where(predicate);
+			}
+		}
+
+		BigDecimal result = entityManager.createQuery(query).getSingleResult();
+		return result != null ? result : BigDecimal.ZERO;
 	}
 
 }

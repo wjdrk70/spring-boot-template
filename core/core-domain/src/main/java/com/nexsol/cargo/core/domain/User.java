@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.domain;
 
 import com.nexsol.cargo.core.enums.UserRole;
+
 import lombok.Builder;
 import lombok.Getter;
 

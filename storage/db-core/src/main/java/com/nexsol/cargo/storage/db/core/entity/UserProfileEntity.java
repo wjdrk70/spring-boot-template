@@ -2,8 +2,7 @@ package com.nexsol.cargo.storage.db.core.entity;
 
 import com.nexsol.cargo.core.domain.UserProfile;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "user_profile")

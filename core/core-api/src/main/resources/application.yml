@@ -1,33 +1,55 @@
+
 # app/src/main/resources/application.yml
 spring:
   application:
     name: cargo-core-api
 
-  # 프로필별 설정 활성화
-  profiles:
-    active: local-dev
+#  # 프로필별 설정 활성화
+#  profiles:
+#    active: local-dev
 
   # .env 파일 import
   config:
     import:
       - optional:file:.env[.properties]
       - db-core.yml
+      - logging.yml
 logging:
   level:
     org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
 
 jwt:
   secret: ${JWT_SECRET}  # .env의 JWT_SECRET 값을 jwt.secret 프로퍼티로 매핑
   expiration: ${JWT_EXPIRATION}
 
+nice-pay:
+  merchant-key: ${NICE_PAY_MERCHANT_KEY}
+  mid: ${NICE_PAY_MID}
+  url:
+    key-in: ${NICE_PAY_KEY_IN_URL}
+    cancel: ${NICE_PAY_CANCEL_URL}
+
+app:
+  payment:
+    success-redirect-url: ${PAYMENT_SUCCESS_REDIRECT_URL}
+    dev-success-redirect-url: ${PAYMENT_DEV_SUCCESS_REDIRECT_URL}
+
+minio:
+  endpoint: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: cargo
+  region: ap-northeast-2
+
 server:
   port: 8080
   tomcat:
-    max-connections: 20000
+    max-connections: 1000
     threads:
-      max: 600
-      min-spare: 100
+      max: 16
+      min-spare: 4
 
 ---
 spring:
@@ -40,6 +62,8 @@ spring:
   config:
     activate:
       on-profile: local-dev
+  jmx:
+    enabled: false
 
 ---
 spring:

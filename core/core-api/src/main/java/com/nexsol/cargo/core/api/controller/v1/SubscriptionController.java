@@ -2,10 +2,8 @@ package com.nexsol.cargo.core.api.controller.v1;
 
 import com.nexsol.cargo.core.api.controller.v1.request.CreateSubscriptionRequest;
 import com.nexsol.cargo.core.api.controller.v1.request.SaveSignatureRequest;
-import com.nexsol.cargo.core.api.controller.v1.response.CreateSubscriptionResponse;
-import com.nexsol.cargo.core.api.controller.v1.response.PolicyResponse;
-import com.nexsol.cargo.core.api.controller.v1.response.SignatureUrlResponse;
-import com.nexsol.cargo.core.api.controller.v1.response.SubscriptionContractResponse;
+import com.nexsol.cargo.core.api.controller.v1.request.SubscriptionListRequest;
+import com.nexsol.cargo.core.api.controller.v1.response.*;
 import com.nexsol.cargo.core.api.support.error.CoreApiErrorType;
 import com.nexsol.cargo.core.api.support.error.CoreApiException;
 import com.nexsol.cargo.core.api.support.response.ApiResponse;
@@ -91,19 +89,20 @@ public class SubscriptionController {
 	}
 
 	@GetMapping
-	public ApiResponse<PageResponse<SubscriptionContractResponse>> getMySubscriptions(
-			@AuthenticationPrincipal Long userId, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
-		DomainPageRequest pageRequest = new DomainPageRequest(page, size);
+	public ApiResponse<SubscriptionListResponse> getMySubscriptions(@AuthenticationPrincipal Long userId,
+			@ModelAttribute SubscriptionListRequest request) {
 
-		DomainPage<SubscriptionContract> domainPage = subscriptionService.getMyContracts(userId, pageRequest);
+		var summery = subscriptionService.getMyContracts(userId, request.toPageRequest());
 
-		List<SubscriptionContractResponse> responseContent = domainPage.content()
-			.stream()
-			.map(SubscriptionContractResponse::of)
-			.toList();
+		return ApiResponse.success(SubscriptionListResponse.of(summery));
+	}
 
-		return ApiResponse.success(PageResponse.of(domainPage, responseContent));
+	@GetMapping("/{subscriptionId}")
+	public ApiResponse<PolicyResponse> getSubscriptionDetail(@AuthenticationPrincipal Long userId,
+			@PathVariable Long subscriptionId) {
+		Subscription subscription = subscriptionService.getSubscription(userId, subscriptionId);
+
+		return ApiResponse.success(PolicyResponse.of(subscription));
 	}
 
 }
