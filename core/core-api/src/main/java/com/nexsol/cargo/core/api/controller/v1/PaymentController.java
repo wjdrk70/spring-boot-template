@@ -10,6 +10,10 @@ import com.nexsol.cargo.core.domain.PaymentReadyResult;
 import com.nexsol.cargo.core.domain.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
 	private final PaymentService paymentService;
+
+	@Value("${app.payment.success-redirect-url}")
+	private String successRedirectUrl;
+
+	@Value("${app.payment.dev-success-redirect-url}")
+	private String devSuccessRedirectUrl;
 
 	@PostMapping("/v1/payments")
 	public ApiResponse<CreatePaymentResponse> create(@AuthenticationPrincipal Long userId,
@@ -42,11 +52,20 @@ public class PaymentController {
 	}
 
 	@PostMapping("/v1/payments/callback/success")
-	public ApiResponse<Object> callbackSuccess(@ModelAttribute PaymentRequest request) {
+	public ResponseEntity<Void> callbackSuccess(@ModelAttribute PaymentRequest request,
+			@RequestHeader(value = "Host") String host) {
+		String finalRedirectUrl;
 
 		paymentService.approvePayment(request.toCreatePayment());
 
-		return ApiResponse.success();
+		if (host.equals("localhost") || host.equals("127.0.0.1")) {
+			finalRedirectUrl = devSuccessRedirectUrl;
+		}
+		else {
+			finalRedirectUrl = successRedirectUrl;
+		}
+
+		return ResponseEntity.status(HttpStatus.FOUND).header(HttpHeaders.LOCATION, finalRedirectUrl).build();
 	}
 
 	@PostMapping("/v1/payments/callback/fail")

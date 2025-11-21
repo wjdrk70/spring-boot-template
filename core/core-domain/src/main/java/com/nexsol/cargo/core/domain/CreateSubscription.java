@@ -7,7 +7,7 @@ import java.util.Set;
 @Builder
 public record CreateSubscription(Long userId, String quotationKey, Set<String> coverageCodes, boolean isSame,
 		String policyholderCompanyName, String policyholderCompanyCode, String insuredCompanyName,
-		String insuredCompanyCode
+		String insuredCompanyCode, String managerName, String managerPhone, String managerEmail
 
 ) {
 }

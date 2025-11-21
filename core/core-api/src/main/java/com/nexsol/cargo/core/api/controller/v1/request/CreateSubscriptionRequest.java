@@ -1,6 +1,7 @@
 package com.nexsol.cargo.core.api.controller.v1.request;
 
 import com.nexsol.cargo.core.domain.CreateSubscription;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +33,15 @@ public class CreateSubscriptionRequest {
 
 	private String insuredCompanyCode;
 
+	@NotBlank(message = "담당자명은 필수입니다.")
+	private String managerName;
+
+	@NotBlank(message = "담당자 연락처는 필수입니다.")
+	private String managerPhone;
+
+	@Email(message = "올바른 이메일 형식이 아닙니다.")
+	private String managerEmail;
+
 	public CreateSubscription toCreateSubscription(Long userId) {
 
 		return CreateSubscription.builder()
@@ -43,6 +53,9 @@ public class CreateSubscriptionRequest {
 			.policyholderCompanyName(this.policyholderCompanyName)
 			.insuredCompanyName(this.insuredCompanyName)
 			.insuredCompanyCode(this.insuredCompanyCode)
+			.managerName(this.managerName)
+			.managerPhone(this.managerPhone)
+			.managerEmail(this.managerEmail)
 			.build();
 
 	}

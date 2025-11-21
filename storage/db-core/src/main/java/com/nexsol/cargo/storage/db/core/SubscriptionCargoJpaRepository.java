@@ -11,4 +11,6 @@ public interface SubscriptionCargoJpaRepository extends JpaRepository<Subscripti
 
 	List<SubscriptionCargoEntity> findByHsCodeStartingWith(String middleCode);
 
+	List<SubscriptionCargoEntity> findBySubscriptionIdIn(List<Long> subscriptionIds);
+
 }

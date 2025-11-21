@@ -17,5 +17,6 @@ include 'support:logging'
 include 'support:monitoring'
 include 'clients:exchange-rate'
 include 'clients:nts-client'
+include 'clients:bucket-storage'
 include 'web:security'
 

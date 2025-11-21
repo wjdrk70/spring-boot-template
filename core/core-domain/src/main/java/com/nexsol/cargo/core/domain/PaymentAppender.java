@@ -14,7 +14,12 @@ public class PaymentAppender {
 
 	public Payment appendReady(Long subscriptionId, BigDecimal amount, PaymentMethod paymentMethod) {
 
-		Payment payment = Payment.createReady(subscriptionId, amount, paymentMethod);
+		Payment payment = paymentRepository.findBySubscriptionId(subscriptionId)
+			.orElseGet(() -> Payment.createReady(subscriptionId, amount, paymentMethod));
+
+		if (payment.getId() != null) {
+			payment.resetToReady(amount, paymentMethod);
+		}
 
 		return paymentRepository.save(payment);
 	}

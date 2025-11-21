@@ -18,6 +18,8 @@ public class PaymentEventHandler {
 
 	private final SubscriptionReader subscriptionReader;
 
+	private final BucketStorageClient bucketStorageClient;
+
 	@EventListener
 	@Transactional
 	public void handlePaymentCompleted(PaymentCompleteEvent event) {
@@ -29,12 +31,26 @@ public class PaymentEventHandler {
 		try {
 			Subscription subscription = subscriptionReader.read(event.subscriptionId());
 
+			if (subscription.getSignatureBase64Temp() != null) {
+				String base64String = subscription.getSignatureBase64Temp();
+				String contentType = subscription.getSignatureContentTypeTemp();
+
+				byte[] signatureBytes = java.util.Base64.getDecoder().decode(base64String);
+				String signatureKey = bucketStorageClient.uploadSignature(subscription.getId(), signatureBytes,
+						contentType);
+
+				subscription.updateSignatureKey(signatureKey);
+				subscription.clearSignatureBase64Temp();
+			}
+
 			subscription.completePayment();
 			subscriptionRepository.save(subscription);
 		}
 		catch (Exception e) {
+			// TODO: bucket fail logic
 			log.error("[Event] PaymentCompletedEvent 처리 중 오류 발생. Subscription ID: {}. Error: {}",
 					event.subscriptionId(), e.getMessage(), e);
+
 		}
 	}
 

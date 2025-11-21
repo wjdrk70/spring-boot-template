@@ -1,16 +1,19 @@
 package com.nexsol.cargo.core.domain;
 
 import com.nexsol.cargo.core.enums.SubscriptionStatus;
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Subscription {
@@ -37,6 +40,22 @@ public class Subscription {
 
 	private CargoDetail cargoDetail;
 
+	private String managerName;
+
+	private String managerPhone;
+
+	private String managerEmail;
+
+	private String signatureKey;
+
+	private String signatureBase64Temp;
+
+	private String signatureContentTypeTemp;
+
+	private LocalDateTime createdAt;
+
+	private LocalDateTime canceledAt;
+
 	private List<SubscriptionCoverage> subscriptionCoverages;
 
 	public void completePayment() {
@@ -53,6 +72,7 @@ public class Subscription {
 			return;
 		}
 		this.status = SubscriptionStatus.CANCEL;
+		this.canceledAt = LocalDateTime.now();
 	}
 
 	public void issuePolicy(String policyNumber) {
@@ -62,6 +82,23 @@ public class Subscription {
 		}
 		this.policyNumber = policyNumber;
 		this.status = SubscriptionStatus.POLICY_ISSUED;
+	}
+
+	public void updateSignatureKey(String signatureKey) {
+		this.signatureKey = signatureKey;
+	}
+
+	public void saveSignatureBase64Temp(String base64String, String contentType) {
+		if (status != SubscriptionStatus.PAYMENT_PENDING) {
+			throw new CoreException(CoreErrorType.SUBSCRIPTION_PENDING_FAILED);
+		}
+		this.signatureBase64Temp = base64String;
+
+	}
+
+	public void clearSignatureBase64Temp() {
+		this.signatureBase64Temp = null;
+		this.signatureContentTypeTemp = null;
 	}
 
 }

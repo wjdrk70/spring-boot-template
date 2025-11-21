@@ -20,7 +20,7 @@ public class SubscriptionCargoEntity {
 
 	@Id
 	@Column(name = "subscription_id")
-	private Long subscriptionId; // ⬅️ PK이자 FK
+	private Long subscriptionId;
 
 	@Column(name = "hs_code", nullable = false)
 	private String hsCode;

@@ -15,6 +15,8 @@ public class PlanRecommendationService {
 
 	private final SubscriptionCoverageReader subscriptionCoverageReader;
 
+	private final CoverageSetFilter coverageSetFilter;
+
 	private final CargoItemFinder cargoItemFinder;
 
 	private final PlanAnalyzer planAnalyzer;
@@ -31,13 +33,14 @@ public class PlanRecommendationService {
 
 		List<SubscriptionCoverageSet> coverageSets = subscriptionCoverageReader.readCoverageSet(middleCode);
 
-		List<Set<String>> topCoverageSets = planAnalyzer.getTopFrequentCoverageSets(coverageSets, TOP_N);
+		List<SubscriptionCoverageSet> filterSets = coverageSetFilter.filter(coverageSets, quotation.getConveyance());
+
+		List<Set<String>> topCoverageSets = planAnalyzer.getTopFrequentCoverageSets(filterSets, TOP_N);
 
 		if (topCoverageSets.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		// 조합 목록을 받아, 마스터 조회 -> 계산 -> 플랜 조립 로직을 위임
 		return planGenerator.generatePlan(topCoverageSets, quotation);
 	}
 

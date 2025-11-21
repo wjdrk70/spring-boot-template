@@ -31,7 +31,9 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource))
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/health", "/v1/auth/register", "/v1/auth/login")
+			.authorizeHttpRequests(auth -> auth
+				// .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				.requestMatchers("/health", "/v1/auth/register", "/v1/auth/login")
 				.permitAll()
 				.requestMatchers("/v1/payments/callback/**") // success, fail 모두 허용
 				.permitAll()
@@ -49,7 +51,8 @@ public class SecurityConfig {
 		CorsConfiguration config = new CorsConfiguration();
 
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(List.of("https://dev-cargo-busan.nexsol.ai/", "http://localhost:3000"));
+		config.setAllowedOrigins(List.of("https://dev-cargo-busan.nexsol.ai",
+				"https://dev-cargo-busan.server.nexsol.ai", "http://localhost:3000", "http://localhost:63344"));
 		// config.setAllowedOriginPatterns(List.of("*"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));

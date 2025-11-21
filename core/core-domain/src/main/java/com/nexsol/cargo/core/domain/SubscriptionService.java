@@ -3,6 +3,8 @@ package com.nexsol.cargo.core.domain;
 import com.nexsol.cargo.core.enums.SubscriptionStatus;
 import com.nexsol.cargo.core.error.CoreErrorType;
 import com.nexsol.cargo.core.error.CoreException;
+import com.nexsol.cargo.core.support.DomainPage;
+import com.nexsol.cargo.core.support.DomainPageRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,10 @@ public class SubscriptionService {
 
 	private final SubscriptionWriter subscriptionWriter;
 
+	private final SubscriptionContractMapper contractMapper;
+
+	private final SubscriptionSearcher subscriptionSearcher;
+
 	private final QuotationReader quotationReader;
 
 	private final CoverageMasterReader coverageMasterReader;
@@ -28,6 +34,8 @@ public class SubscriptionService {
 	private final SubscriptionCoverageManager subscriptionCoverageManager;
 
 	private final PremiumCalculator premiumCalculator;
+
+	private final BucketStorageClient bucketStorageClient;
 
 	@Transactional
 	public SubscriptionResult create(CreateSubscription creation) {
@@ -56,9 +64,9 @@ public class SubscriptionService {
 			return subscription;
 		}
 
-		if (subscription.getStatus() != SubscriptionStatus.PAYMENT_COMPLETE) {
-			throw new CoreException(CoreErrorType.POLICY_CANNOT_BE_ISSUED);
-		}
+		// if (subscription.getStatus() != SubscriptionStatus.PAYMENT_COMPLETE) {
+		// throw new CoreException(CoreErrorType.POLICY_CANNOT_BE_ISSUED);
+		// }
 
 		String policyNumber = String.format("DB-%d-%06d", LocalDate.now().getYear(), subscription.getId());
 
@@ -67,6 +75,60 @@ public class SubscriptionService {
 		Subscription issuedSubscription = subscriptionWriter.write(subscription);
 
 		return issuedSubscription;
+	}
+
+	@Transactional
+	public void saveSignature(Long userId, Long subscriptionId, String signatureBase64, String contentType) {
+		Subscription subscription = subscriptionReader.read(subscriptionId, userId);
+
+		subscription.saveSignatureBase64Temp(signatureBase64, contentType);
+
+		subscriptionWriter.write(subscription);
+
+	}
+
+	public SubscriptionSignatureImage getSignatureImage(Long userId, Long subscriptionId) {
+		Subscription subscription = subscriptionReader.read(subscriptionId, userId);
+
+		String signatureKey = subscription.getSignatureKey();
+
+		if (signatureKey == null || signatureKey.isBlank()) {
+			throw new CoreException(CoreErrorType.SUBSCRIPTION_NOT_FOUND_SIGNATURE);
+		}
+
+		String contentType = subscription.getSignatureContentTypeTemp(); // TODO: 영구 필드에서
+																			// 읽도록 수정 필요
+
+		byte[] imageBytes = bucketStorageClient.downloadSignature(signatureKey);
+
+		return new SubscriptionSignatureImage(imageBytes, contentType);
+	}
+
+	public String getSignatureDownloadUrl(Long userId, Long subscriptionId) {
+		Subscription subscription = subscriptionReader.read(subscriptionId, userId);
+
+		String signatureKey = subscription.getSignatureKey();
+
+		if (signatureKey == null || signatureKey.isBlank()) {
+			throw new CoreException(CoreErrorType.NOT_FOUND_DATA);
+		}
+
+		return bucketStorageClient.generateDownloadPresignedUrl(signatureKey);
+	}
+
+	public DomainPage<SubscriptionContract> getMyContracts(Long userId, DomainPageRequest pageRequest) {
+
+		DomainPage<Subscription> pages = subscriptionReader.readAllByUserId(userId, pageRequest);
+
+		return contractMapper.map(pages);
+	}
+
+	public DomainPage<SubscriptionContract> searchMyContracts(Long userId, SubscriptionSearch contract,
+			DomainPageRequest pageRequest) {
+
+		DomainPage<Subscription> pages = subscriptionSearcher.search(userId, contract, pageRequest);
+
+		return contractMapper.map(pages);
 	}
 
 }

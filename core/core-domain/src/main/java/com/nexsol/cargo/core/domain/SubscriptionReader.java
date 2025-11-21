@@ -3,6 +3,8 @@ package com.nexsol.cargo.core.domain;
 import com.nexsol.cargo.core.enums.SubscriptionStatus;
 import com.nexsol.cargo.core.error.CoreErrorType;
 import com.nexsol.cargo.core.error.CoreException;
+import com.nexsol.cargo.core.support.DomainPage;
+import com.nexsol.cargo.core.support.DomainPageRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,10 @@ public class SubscriptionReader {
 		}
 
 		return subscription;
+	}
+
+	public DomainPage<Subscription> readAllByUserId(Long userId, DomainPageRequest pageRequest) {
+		return subscriptionRepository.findAllByUserId(userId, pageRequest);
 	}
 
 	public Subscription read(Long subscriptionId) {

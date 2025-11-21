@@ -2,6 +2,8 @@ package com.nexsol.cargo.core.domain;
 
 import com.nexsol.cargo.core.enums.PaymentMethod;
 import com.nexsol.cargo.core.enums.PaymentStatus;
+import com.nexsol.cargo.core.error.CoreErrorType;
+import com.nexsol.cargo.core.error.CoreException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,6 +45,17 @@ public class Payment {
 			.paymentStatus(PaymentStatus.READY)
 			.paymentMethod(paymentMethod)
 			.build();
+	}
+
+	public void resetToReady(BigDecimal amount, PaymentMethod paymentMethod) {
+		if (this.paymentStatus == PaymentStatus.SUCCESS) {
+			throw new CoreException(CoreErrorType.PAYMENT_ALREADY_PAID);
+		}
+		this.insurancePremium = amount;
+		this.paymentMethod = paymentMethod;
+		this.paymentStatus = PaymentStatus.READY;
+		this.authCode = null;
+		this.cardType = null;
 	}
 
 	public void success(String tid, String authCode, String cardCode) {

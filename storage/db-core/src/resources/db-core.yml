@@ -1,0 +1,115 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.default_batch_fetch_size: 100
+
+---
+spring.config.activate.on-profile: local
+spring:
+  jpa:
+    properties:
+      hibernate:
+  #        format_sql: true
+  #        show_sql: true
+
+  flyway:
+    clean-on-validation-error: true
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false  # 임시로 validation 비활성화
+    locations: classpath:db/migration
+
+
+storage:
+  datasource:
+    core:
+      driver-class-name: org.h2.Driver
+      jdbc-url: jdbc:h2:mem:core;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      username: sa
+      password:  # 빈 값 또는 생략
+      maximum-pool-size: 8
+      minimum-idle: 5
+      pool-name: core-db-pool
+      data-source-properties:
+        rewriteBatchedStatements: true
+
+
+---
+spring.config.activate.on-profile: local-dev
+spring:
+  jmx:
+    enabled: false
+  docker:
+    compose:
+      enabled: true
+  flyway:
+    enabled: false
+    validate-on-migrate: false
+storage:
+  datasource:
+    core:
+      jdbc-url: jdbc:mysql://localhost:${DB_PORT}/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 8
+        minimum-idle: 5
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000
+---
+# 3. 프론트 개발자용 (Docker App -> Docker DB) (추가)
+spring.config.activate.on-profile: docker-dev
+spring:
+  docker:
+    compose:
+      enabled: false
+storage:
+  datasource:
+    core:
+      # ⬇️ ${DB_HOST} (즉, 'mysql')을 사용
+      jdbc-url: jdbc:mysql://${DB_HOST}:3306/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 8
+        minimum-idle: 5
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000
+
+---
+spring.config.activate.on-profile: dev
+spring:
+  docker:
+    compose:
+      enabled: false
+flyway:
+  enabled: true
+  # 기존 데이터가 있는 경우 (데이터 보존)
+  baseline-on-migrate: true
+  # 스키마를 삭제(clean)하는 명령을 원천 차단
+  clean-disabled: true
+  validate-on-migrate: false
+  locations: classpath:db/migration
+  url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+  user: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+storage:
+  datasource:
+    core:
+      jdbc-url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?serverTimezone=UTC&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 8
+        minimum-idle: 5
+        idle-timeout: 300000
+        connection-timeout: 20000
+        validation-timeout: 5000
